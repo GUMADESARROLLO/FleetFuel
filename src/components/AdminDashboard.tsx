@@ -1,28 +1,22 @@
 import { useEffect, useState, useMemo } from 'react';
+import DatePicker from 'react-datepicker';
+import { es } from 'date-fns/locale';
+import 'react-datepicker/dist/react-datepicker.css';
 import { getSession, requireAuth, isAdmin, logout } from '../lib/auth';
 import { getRegistros, formatCurrency, formatDate } from '../lib/storage';
 import { USUARIOS } from '../lib/constants';
 import type { RegistroCombustible, Session } from '../lib/types';
 
-interface Filters {
-  desde: string;
-  hasta: string;
-  conductor: string;
-}
-
 export default function AdminDashboard() {
   const [session, setSession] = useState<Session | null>(null);
   const [registros, setRegistros] = useState<RegistroCombustible[]>([]);
   const [loading, setLoading] = useState(true);
-  const [filters, setFilters] = useState<Filters>(() => {
-    const now = new Date();
-    const primero = new Date(now.getFullYear(), now.getMonth(), 1);
-    return {
-      desde: primero.toISOString().split('T')[0],
-      hasta: now.toISOString().split('T')[0],
-      conductor: '',
-    };
+  const [dateDesde, setDateDesde] = useState<Date | null>(() => {
+    const d = new Date();
+    return new Date(d.getFullYear(), d.getMonth(), 1);
   });
+  const [dateHasta, setDateHasta] = useState<Date | null>(new Date());
+  const [filtroConductor, setFiltroConductor] = useState('');
 
   useEffect(() => {
     requireAuth();
@@ -46,17 +40,17 @@ export default function AdminDashboard() {
 
   const filtered = useMemo(() => {
     let data = [...registros];
-    if (filters.desde) {
-      data = data.filter(r => new Date(r.fechaCreacion) >= new Date(filters.desde + 'T00:00:00'));
+    if (dateDesde) {
+      data = data.filter(r => new Date(r.fechaCreacion) >= new Date(dateDesde.getFullYear(), dateDesde.getMonth(), dateDesde.getDate()));
     }
-    if (filters.hasta) {
-      data = data.filter(r => new Date(r.fechaCreacion) <= new Date(filters.hasta + 'T23:59:59'));
+    if (dateHasta) {
+      data = data.filter(r => new Date(r.fechaCreacion) <= new Date(dateHasta.getFullYear(), dateHasta.getMonth(), dateHasta.getDate(), 23, 59, 59));
     }
-    if (filters.conductor) {
-      data = data.filter(r => r.userId === filters.conductor);
+    if (filtroConductor) {
+      data = data.filter(r => r.userId === filtroConductor);
     }
     return data.sort((a, b) => new Date(b.fechaCreacion).getTime() - new Date(a.fechaCreacion).getTime());
-  }, [registros, filters]);
+  }, [registros, dateDesde, dateHasta, filtroConductor]);
 
   const metrics = useMemo(() => {
     const totalRegistros = filtered.length;
@@ -133,27 +127,40 @@ export default function AdminDashboard() {
           <div className="flex flex-col sm:flex-row gap-3 items-end">
             <div className="flex-1 w-full sm:w-auto">
               <label className="block text-xs font-medium text-text-muted mb-1">Desde</label>
-              <input
-                type="date"
-                value={filters.desde}
-                onChange={e => setFilters(f => ({ ...f, desde: e.target.value }))}
-                className="w-full h-10 px-3 bg-bg border border-border rounded-lg text-text text-sm focus:outline-none focus:border-accent transition-colors"
+              <DatePicker
+                selected={dateDesde}
+                onChange={(d) => setDateDesde(d)}
+                selectsStart
+                startDate={dateDesde || undefined}
+                endDate={dateHasta || undefined}
+                locale={es}
+                dateFormat="dd/MM/yyyy"
+                placeholderText="Seleccionar fecha"
+                className="w-full h-10 px-3 bg-bg border border-border rounded-lg text-text text-sm focus:outline-none focus:border-accent transition-colors cursor-pointer"
+                wrapperClassName="w-full"
               />
             </div>
             <div className="flex-1 w-full sm:w-auto">
               <label className="block text-xs font-medium text-text-muted mb-1">Hasta</label>
-              <input
-                type="date"
-                value={filters.hasta}
-                onChange={e => setFilters(f => ({ ...f, hasta: e.target.value }))}
-                className="w-full h-10 px-3 bg-bg border border-border rounded-lg text-text text-sm focus:outline-none focus:border-accent transition-colors"
+              <DatePicker
+                selected={dateHasta}
+                onChange={(d) => setDateHasta(d)}
+                selectsEnd
+                startDate={dateDesde || undefined}
+                endDate={dateHasta || undefined}
+                minDate={dateDesde || undefined}
+                locale={es}
+                dateFormat="dd/MM/yyyy"
+                placeholderText="Seleccionar fecha"
+                className="w-full h-10 px-3 bg-bg border border-border rounded-lg text-text text-sm focus:outline-none focus:border-accent transition-colors cursor-pointer"
+                wrapperClassName="w-full"
               />
             </div>
             <div className="flex-1 w-full sm:w-auto">
               <label className="block text-xs font-medium text-text-muted mb-1">Conductor</label>
               <select
-                value={filters.conductor}
-                onChange={e => setFilters(f => ({ ...f, conductor: e.target.value }))}
+                value={filtroConductor}
+                onChange={e => setFiltroConductor(e.target.value)}
                 className="w-full h-10 px-3 bg-bg border border-border rounded-lg text-text text-sm focus:outline-none focus:border-accent transition-colors"
               >
                 <option value="">Todos</option>
@@ -162,9 +169,9 @@ export default function AdminDashboard() {
                 ))}
               </select>
             </div>
-            {(filters.desde || filters.hasta || filters.conductor) && (
+            {(dateDesde || dateHasta || filtroConductor) && (
               <button
-                onClick={() => setFilters({ desde: '', hasta: '', conductor: '' })}
+                onClick={() => { setDateDesde(null); setDateHasta(null); setFiltroConductor(''); }}
                 className="h-10 px-4 text-sm text-text-muted hover:text-text border border-border rounded-lg hover:bg-surface transition-colors touch-target whitespace-nowrap"
               >
                 Limpiar

@@ -8,7 +8,7 @@ interface PhotoUploadProps {
   required?: boolean;
 }
 
-export default function PhotoUpload({ label, value, onChange, shape = 'circle', required }: PhotoUploadProps) {
+export default function PhotoUpload({ label, value, onChange, shape = 'rect', required }: PhotoUploadProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [error, setError] = useState('');
 

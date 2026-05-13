@@ -183,30 +183,26 @@ export default function NuevoRegistroWizard() {
           <p className="text-sm text-text-muted mb-6">Toma o selecciona fotos de cada evidencia requerida</p>
           <div className="grid grid-cols-2 gap-4 mb-6">
             <PhotoUpload
-              label="Odómetro ANTES"
+              label="Odómetro Antes"
               value={form.fotoOdometroAntes}
               onChange={(v) => updateField('fotoOdometroAntes', v)}
-              shape="circle"
-              required
             />
             <PhotoUpload
-              label="Odómetro DESPUÉS"
+              label="Odómetro Después"
               value={form.fotoOdometroDespues}
               onChange={(v) => updateField('fotoOdometroDespues', v)}
-              shape="circle"
-              required
             />
             <PhotoUpload
               label="Factura / Vale"
               value={form.fotoFactura}
               onChange={(v) => updateField('fotoFactura', v)}
-              shape="rect"
+              required
             />
             <PhotoUpload
               label="Voucher / Placa"
               value={form.fotoVoucher}
               onChange={(v) => updateField('fotoVoucher', v)}
-              shape="rect"
+              required
             />
           </div>
           {errors.fotoOdometroAntes && (

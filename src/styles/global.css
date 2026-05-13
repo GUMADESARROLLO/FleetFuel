@@ -1,16 +1,33 @@
 @import "tailwindcss";
 
 @theme {
+  --color-primary: #2B013E;
+  --color-primary-2: #652481;
+
+  --color-accent: #e87405;
+  --color-accent-2: #F79007;
+  --color-accent-3: #A25E05;
+
+  --color-info: #039AF4;
+  --color-info-2: #026E9F;
+
+  --color-success: #00BF87;
+  --color-success-2: #006A4B;
+
+  --color-danger: #DC2626;
+
   --color-bg: #0F1117;
-  --color-surface: #1A1D27;
-  --color-surface-2: #22263A;
-  --color-accent: #F97316;
-  --color-accent-2: #3B82F6;
-  --color-text: #F1F5F9;
-  --color-text-muted: #64748B;
-  --color-success: #22C55E;
-  --color-danger: #EF4444;
-  --color-border: #2D3148;
+  --color-surface: #1A1D24;
+  --color-surface-2: #2A2D35;
+
+  --color-text: #E8E8E8;
+  --color-text-muted: #9CA3AF;
+  --color-text-dark: #FFFFFF;
+
+  --color-border: #333333;
+  --color-border-dark: #444444;
+
+  --color-sidebar: #32373C;
 
   --font-display: "Barlow Condensed", sans-serif;
   --font-body: "DM Sans", sans-serif;
@@ -43,7 +60,7 @@ input:-webkit-autofill,
 input:-webkit-autofill:hover,
 input:-webkit-autofill:focus {
   -webkit-text-fill-color: var(--color-text);
-  -webkit-box-shadow: 0 0 0px 1000px var(--color-surface-2) inset;
+  -webkit-box-shadow: 0 0 0px 1000px #1A1D24 inset;
   transition: background-color 5000s ease-in-out 0s;
 }
 
@@ -54,15 +71,28 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 
 @keyframes pulse-glow {
   0%, 100% {
-    box-shadow: 0 0 0 0 rgba(249, 115, 22, 0.4);
+    box-shadow: 0 0 0 0 rgba(232, 114, 0, 0.35);
   }
   50% {
-    box-shadow: 0 0 0 8px rgba(249, 115, 22, 0);
+    box-shadow: 0 0 0 8px rgba(232, 114, 0, 0);
   }
 }
 
 .animate-pulse-glow {
   animation: pulse-glow 2s infinite;
+}
+
+@keyframes pulse-glow-primary {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(43, 1, 62, 0.35);
+  }
+  50% {
+    box-shadow: 0 0 0 8px rgba(43, 1, 62, 0);
+  }
+}
+
+.animate-pulse-glow-primary {
+  animation: pulse-glow-primary 2s infinite;
 }
 
 @keyframes shake {
@@ -104,7 +134,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 }
 
 .dot-pattern {
-  background-image: radial-gradient(circle, #2D3148 1px, transparent 1px);
+  background-image: radial-gradient(circle, #2A2D35 1px, transparent 1px);
   background-size: 24px 24px;
 }
 
@@ -123,4 +153,38 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 .scrollbar-hide {
   -ms-overflow-style: none;
   scrollbar-width: none;
+}
+
+.card-shadow {
+  box-shadow: 0 1px 3px rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.2);
+}
+
+.card-shadow-hover:hover {
+  box-shadow: 0 4px 12px rgba(0,0,0,0.4), 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.btn-gradient-accent {
+  background: linear-gradient(135deg, #e87405 0%, #F79007 100%);
+}
+
+.btn-gradient-primary {
+  background: linear-gradient(135deg, #2B013E 0%, #652481 100%);
+}
+
+.btn-gradient-info {
+  background: linear-gradient(135deg, #039AF4 0%, #026E9F 100%);
+}
+
+@keyframes fade-out {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+.animate-fade-out {
+  animation: fade-out 2s ease-in forwards;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #444444 transparent;
 }

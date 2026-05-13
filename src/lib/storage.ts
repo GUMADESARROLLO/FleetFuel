@@ -135,6 +135,23 @@ export function clearPendingSync(id: string): void {
   }
 }
 
+export function getPendingSyncIds(): string[] {
+  if (typeof window === 'undefined') return [];
+  const raw = localStorage.getItem(PENDING_SYNC_KEY);
+  if (!raw) return [];
+  try {
+    const ids = JSON.parse(raw) as string[];
+    return Array.isArray(ids) ? ids : [];
+  } catch {
+    return [];
+  }
+}
+
+export function clearAllPendingSync(): void {
+  if (typeof window === 'undefined') return;
+  localStorage.removeItem(PENDING_SYNC_KEY);
+}
+
 export async function getMesesDisponibles(
   userId: string
 ): Promise<{ mes: number; anio: number }[]> {

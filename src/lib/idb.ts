@@ -53,6 +53,37 @@ export async function getRegistroByIdDB(id: string): Promise<RegistroCombustible
   });
 }
 
+export async function updateSyncStatusBatchDB(ids: string[], sincronizado: boolean): Promise<void> {
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(STORE_NAME, 'readwrite');
+    const store = tx.objectStore(STORE_NAME);
+    let completed = 0;
+    ids.forEach((id) => {
+      const req = store.get(id);
+      req.onsuccess = () => {
+        const record = req.result as RegistroCombustible | undefined;
+        if (record) {
+          record.sincronizado = sincronizado;
+          store.put(record);
+        }
+        completed++;
+        if (completed === ids.length) {
+          resolve();
+        }
+      };
+      req.onerror = () => {
+        completed++;
+        if (completed === ids.length) {
+          resolve();
+        }
+      };
+    });
+    if (ids.length === 0) resolve();
+    tx.onerror = () => reject(tx.error);
+  });
+}
+
 export async function clearAllRegistrosDB(): Promise<void> {
   const db = await openDB();
   return new Promise((resolve, reject) => {

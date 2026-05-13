@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import OfflineBadge from './OfflineBadge';
+import SyncIndicator from './SyncIndicator';
 import { getSession, logout } from '../lib/auth';
 import type { Session } from '../lib/types';
 
@@ -47,6 +48,7 @@ export default function StickyHeader({ title, showBack, onBack }: StickyHeaderPr
             <h1 className="font-display font-bold text-lg text-text">{title}</h1>
           )}
           <OfflineBadge />
+          <SyncIndicator />
         </div>
         {session && (
           <div className="flex items-center gap-2">

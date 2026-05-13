@@ -1,7 +1,10 @@
 import { writeFileSync } from 'fs';
 import { deflateSync } from 'zlib';
 
-function createPNG(size, r, g, b) {
+const BG_R = 245, BG_G = 247, BG_B = 248;
+const ACCENT_R = 232, ACCENT_G = 114, ACCENT_B = 0;
+
+function createPNG(size) {
   const signature = Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]);
 
   const ihdrData = Buffer.alloc(13);
@@ -17,8 +20,7 @@ function createPNG(size, r, g, b) {
 
   const raw = Buffer.alloc(size * size * 3 + size);
   const center = size / 2;
-  const radius = size * 0.35;
-  const innerRadius = size * 0.12;
+  const radius = size * 0.38;
 
   for (let y = 0; y < size; y++) {
     raw[y * (size * 3 + 1)] = 0;
@@ -28,13 +30,13 @@ function createPNG(size, r, g, b) {
       const dist = Math.sqrt(dx * dx + dy * dy);
       const offset = y * (size * 3 + 1) + 1 + x * 3;
       if (dist <= radius) {
-        raw[offset] = r;
-        raw[offset + 1] = g;
-        raw[offset + 2] = b;
+        raw[offset] = ACCENT_R;
+        raw[offset + 1] = ACCENT_G;
+        raw[offset + 2] = ACCENT_B;
       } else {
-        raw[offset] = 15;
-        raw[offset + 1] = 17;
-        raw[offset + 2] = 23;
+        raw[offset] = BG_R;
+        raw[offset + 1] = BG_G;
+        raw[offset + 2] = BG_B;
       }
     }
   }
@@ -74,10 +76,8 @@ const sizes = [
   { file: 'public/icons/apple-touch-icon.png', size: 180 },
 ];
 
-const ORANGE_R = 249, ORANGE_G = 115, ORANGE_B = 22;
-
 for (const { file, size } of sizes) {
-  const png = createPNG(size, ORANGE_R, ORANGE_G, ORANGE_B);
+  const png = createPNG(size);
   writeFileSync(file, png);
   console.log(`Generated ${file} (${size}x${size})`);
 }

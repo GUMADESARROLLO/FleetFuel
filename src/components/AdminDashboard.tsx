@@ -1,12 +1,11 @@
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, useRef } from 'react';
 import DatePicker from 'react-datepicker';
 import { es } from 'date-fns/locale';
 import { format } from 'date-fns';
 import { getSession, requireAuth, isAdmin, logout } from '../lib/auth';
 import { formatCurrency, formatDate } from '../lib/storage';
-import { apiGetRegistros } from '../lib/api';
-import { USUARIOS } from '../lib/constants';
-import type { RegistroCombustible, Session } from '../lib/types';
+import { apiGetRegistros, apiGetUsuarios } from '../lib/api';
+import type { RegistroCombustible, Session, Usuario } from '../lib/types';
 
 export default function AdminDashboard() {
   const [session, setSession] = useState<Session | null>(null);
@@ -18,6 +17,9 @@ export default function AdminDashboard() {
   });
   const [dateHasta, setDateHasta] = useState<Date | null>(new Date());
   const [filtroConductor, setFiltroConductor] = useState('');
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [usuarios, setUsuarios] = useState<Usuario[]>([]);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     requireAuth();
@@ -33,11 +35,25 @@ export default function AdminDashboard() {
     if (!session) return;
     (async () => {
       setLoading(true);
-      const all = await apiGetRegistros();
+      const [all, users] = await Promise.all([
+        apiGetRegistros(),
+        apiGetUsuarios(),
+      ]);
       setRegistros(all);
+      setUsuarios(users);
       setLoading(false);
     })();
   }, [session]);
+
+  useEffect(() => {
+    const handleClick = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, []);
 
   const filtered = useMemo(() => {
     let data = [...registros];
@@ -64,7 +80,7 @@ export default function AdminDashboard() {
   const porConductor = useMemo(() => {
     const map = new Map<string, { nombre: string; registros: number; litros: number; importe: number }>();
     filtered.forEach(r => {
-      const u = USUARIOS.find(u => u.username === r.userId);
+      const u = usuarios.find(u => u.username === r.userId);
       const nombre = u?.nombre || r.userId;
       const existing = map.get(r.userId) || { nombre, registros: 0, litros: 0, importe: 0 };
       existing.registros++;
@@ -92,20 +108,45 @@ export default function AdminDashboard() {
             </svg>
             <span className="font-display font-bold text-lg text-text">Admin FleetFuel</span>
           </div>
-          <div className="flex items-center gap-3">
-            <span className="text-xs text-text-muted hidden sm:block">{session.nombre}</span>
-            <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center">
-              <span className="text-xs font-bold text-white">A</span>
-            </div>
+          <div className="relative" ref={dropdownRef}>
             <button
-              onClick={handleLogout}
-              className="w-9 h-9 flex items-center justify-center rounded-lg hover:bg-surface transition-colors text-text-muted hover:text-danger touch-target"
-              title="Cerrar sesión"
+              onClick={() => setDropdownOpen(!dropdownOpen)}
+              className="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-surface transition-colors touch-target"
             >
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+              <span className="text-xs text-text-muted hidden sm:block">{session.nombre}</span>
+              <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center">
+                <span className="text-xs font-bold text-white">{session.nombre.charAt(0)}</span>
+              </div>
+              <svg className={`w-4 h-4 text-text-muted transition-transform ${dropdownOpen ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
               </svg>
             </button>
+            {dropdownOpen && (
+              <div className="absolute right-0 top-full mt-1 w-56 bg-surface border border-border rounded-xl shadow-2xl py-1 z-50">
+                <div className="px-4 py-2.5 border-b border-border">
+                  <p className="text-sm font-medium text-text truncate">{session.nombre}</p>
+                  <p className="text-xs text-text-muted truncate">@{session.username}</p>
+                </div>
+                <a
+                  href="/admin/usuarios"
+                  className="flex items-center gap-3 px-4 py-2.5 text-sm text-text hover:bg-bg transition-colors touch-target"
+                >
+                  <svg className="w-4 h-4 text-text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
+                  </svg>
+                  Gestión de Usuarios
+                </a>
+                <button
+                  onClick={handleLogout}
+                  className="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-danger hover:bg-bg transition-colors touch-target"
+                >
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                  </svg>
+                  Cerrar Sesión
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </header>
@@ -161,7 +202,7 @@ export default function AdminDashboard() {
                 className="w-full h-10 px-3 bg-bg border border-border rounded-lg text-text text-sm focus:outline-none focus:border-accent transition-colors"
               >
                 <option value="">Todos</option>
-                {USUARIOS.filter(u => u.role === 'conductor').map(u => (
+                {usuarios.filter(u => u.role === 'conductor').map(u => (
                   <option key={u.username} value={u.username}>{u.nombre}</option>
                 ))}
               </select>
@@ -262,7 +303,7 @@ export default function AdminDashboard() {
                     </thead>
                     <tbody>
                       {filtered.map(r => {
-                        const conductor = USUARIOS.find(u => u.username === r.userId);
+                        const conductor = usuarios.find(u => u.username === r.userId);
                         return (
                           <tr key={r.id} className="border-b border-border/50 hover:bg-bg/30 transition-colors">
                             <td className="py-3 px-4 text-text whitespace-nowrap">{formatDate(r.fechaCreacion)}</td>

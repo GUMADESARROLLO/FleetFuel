@@ -3,6 +3,13 @@ export interface User {
   nombre: string;
 }
 
+export interface Usuario {
+  username: string;
+  nombre: string;
+  password?: string;
+  role: 'admin' | 'conductor';
+}
+
 export interface Session {
   username: string;
   nombre: string;

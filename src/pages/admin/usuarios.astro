@@ -1,0 +1,8 @@
+---
+import AppLayout from '../../layouts/AppLayout.astro';
+import AdminUsers from '../../components/AdminUsers';
+---
+
+<AppLayout title="Admin - Usuarios" hideNav hideHeader>
+  <AdminUsers client:load />
+</AppLayout>

@@ -1,4 +1,4 @@
-import type { RegistroCombustible } from './types';
+import type { RegistroCombustible, Usuario } from './types';
 
 const BASE = '/api';
 
@@ -41,4 +41,47 @@ export async function apiSyncRegistros(ids: string[]): Promise<void> {
     body: JSON.stringify({ ids, sincronizado: true }),
   });
   if (!res.ok) throw new Error('Error syncing registros');
+}
+
+export async function apiGetUsuarios(): Promise<Usuario[]> {
+  const res = await fetch(`${BASE}/usuarios`);
+  if (!res.ok) throw new Error('Error fetching usuarios');
+  const json = await res.json();
+  return json.data || [];
+}
+
+export async function apiCreateUsuario(usuario: Usuario): Promise<void> {
+  const res = await fetch(`${BASE}/usuarios`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(usuario),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.error || 'Error creating usuario');
+  }
+}
+
+export async function apiUpdateUsuario(username: string, usuario: Partial<Usuario>): Promise<void> {
+  const res = await fetch(`${BASE}/usuarios`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ username, ...usuario }),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.error || 'Error updating usuario');
+  }
+}
+
+export async function apiDeleteUsuario(username: string): Promise<void> {
+  const res = await fetch(`${BASE}/usuarios`, {
+    method: 'DELETE',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ username }),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.error || 'Error deleting usuario');
+  }
 }

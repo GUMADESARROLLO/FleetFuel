@@ -1,0 +1,296 @@
+import { useEffect, useState, useMemo } from 'react';
+import { getSession, requireAuth, isAdmin, logout } from '../lib/auth';
+import { getRegistros, formatCurrency, formatDate } from '../lib/storage';
+import { USUARIOS } from '../lib/constants';
+import type { RegistroCombustible, Session } from '../lib/types';
+
+interface Filters {
+  desde: string;
+  hasta: string;
+  conductor: string;
+}
+
+export default function AdminDashboard() {
+  const [session, setSession] = useState<Session | null>(null);
+  const [registros, setRegistros] = useState<RegistroCombustible[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [filters, setFilters] = useState<Filters>(() => {
+    const now = new Date();
+    const primero = new Date(now.getFullYear(), now.getMonth(), 1);
+    return {
+      desde: primero.toISOString().split('T')[0],
+      hasta: now.toISOString().split('T')[0],
+      conductor: '',
+    };
+  });
+
+  useEffect(() => {
+    requireAuth();
+    const sess = getSession();
+    if (!sess || !isAdmin()) {
+      window.location.href = '/login';
+      return;
+    }
+    setSession(sess);
+  }, []);
+
+  useEffect(() => {
+    if (!session) return;
+    (async () => {
+      setLoading(true);
+      const all = await getRegistros();
+      setRegistros(all);
+      setLoading(false);
+    })();
+  }, [session]);
+
+  const filtered = useMemo(() => {
+    let data = [...registros];
+    if (filters.desde) {
+      data = data.filter(r => new Date(r.fechaCreacion) >= new Date(filters.desde + 'T00:00:00'));
+    }
+    if (filters.hasta) {
+      data = data.filter(r => new Date(r.fechaCreacion) <= new Date(filters.hasta + 'T23:59:59'));
+    }
+    if (filters.conductor) {
+      data = data.filter(r => r.userId === filters.conductor);
+    }
+    return data.sort((a, b) => new Date(b.fechaCreacion).getTime() - new Date(a.fechaCreacion).getTime());
+  }, [registros, filters]);
+
+  const metrics = useMemo(() => {
+    const totalRegistros = filtered.length;
+    const totalLitros = filtered.reduce((s, r) => s + (r.litros || 0), 0);
+    const totalImporte = filtered.reduce((s, r) => s + (r.importeTotal || 0), 0);
+    const conductores = new Set(filtered.map(r => r.userId));
+    return { totalRegistros, totalLitros, totalImporte, conductores: conductores.size };
+  }, [filtered]);
+
+  const porConductor = useMemo(() => {
+    const map = new Map<string, { nombre: string; registros: number; litros: number; importe: number }>();
+    filtered.forEach(r => {
+      const u = USUARIOS.find(u => u.username === r.userId);
+      const nombre = u?.nombre || r.userId;
+      const existing = map.get(r.userId) || { nombre, registros: 0, litros: 0, importe: 0 };
+      existing.registros++;
+      existing.litros += r.litros || 0;
+      existing.importe += r.importeTotal || 0;
+      map.set(r.userId, existing);
+    });
+    return Array.from(map.values());
+  }, [filtered]);
+
+  const handleLogout = () => {
+    logout();
+    window.location.href = '/login';
+  };
+
+  if (!session) return null;
+
+  return (
+    <div className="min-h-screen bg-bg">
+      <header className="sticky top-0 z-30 bg-bg/95 backdrop-blur-lg border-b border-border safe-area-top">
+        <div className="flex items-center justify-between px-4 h-14 max-w-6xl mx-auto">
+          <div className="flex items-center gap-2">
+            <svg className="w-6 h-6 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+            </svg>
+            <span className="font-display font-bold text-lg text-text">Admin FleetFuel</span>
+          </div>
+          <div className="flex items-center gap-3">
+            <span className="text-xs text-text-muted hidden sm:block">{session.nombre}</span>
+            <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center">
+              <span className="text-xs font-bold text-white">A</span>
+            </div>
+            <button
+              onClick={handleLogout}
+              className="w-9 h-9 flex items-center justify-center rounded-lg hover:bg-surface transition-colors text-text-muted hover:text-danger touch-target"
+              title="Cerrar sesión"
+            >
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <main className="px-4 py-4 max-w-6xl mx-auto">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
+          <h1 className="text-xl font-bold font-display text-text">Panel de Administración</h1>
+          <a
+            href="/dashboard"
+            className="text-sm text-accent font-medium hover:underline touch-target inline-flex items-center gap-1"
+          >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+            </svg>
+            Ir a vista conductor
+          </a>
+        </div>
+
+        <div className="bg-surface rounded-xl border border-border p-4 mb-6">
+          <div className="flex flex-col sm:flex-row gap-3 items-end">
+            <div className="flex-1 w-full sm:w-auto">
+              <label className="block text-xs font-medium text-text-muted mb-1">Desde</label>
+              <input
+                type="date"
+                value={filters.desde}
+                onChange={e => setFilters(f => ({ ...f, desde: e.target.value }))}
+                className="w-full h-10 px-3 bg-bg border border-border rounded-lg text-text text-sm focus:outline-none focus:border-accent transition-colors"
+              />
+            </div>
+            <div className="flex-1 w-full sm:w-auto">
+              <label className="block text-xs font-medium text-text-muted mb-1">Hasta</label>
+              <input
+                type="date"
+                value={filters.hasta}
+                onChange={e => setFilters(f => ({ ...f, hasta: e.target.value }))}
+                className="w-full h-10 px-3 bg-bg border border-border rounded-lg text-text text-sm focus:outline-none focus:border-accent transition-colors"
+              />
+            </div>
+            <div className="flex-1 w-full sm:w-auto">
+              <label className="block text-xs font-medium text-text-muted mb-1">Conductor</label>
+              <select
+                value={filters.conductor}
+                onChange={e => setFilters(f => ({ ...f, conductor: e.target.value }))}
+                className="w-full h-10 px-3 bg-bg border border-border rounded-lg text-text text-sm focus:outline-none focus:border-accent transition-colors"
+              >
+                <option value="">Todos</option>
+                {USUARIOS.filter(u => u.role === 'conductor').map(u => (
+                  <option key={u.username} value={u.username}>{u.nombre}</option>
+                ))}
+              </select>
+            </div>
+            {(filters.desde || filters.hasta || filters.conductor) && (
+              <button
+                onClick={() => setFilters({ desde: '', hasta: '', conductor: '' })}
+                className="h-10 px-4 text-sm text-text-muted hover:text-text border border-border rounded-lg hover:bg-surface transition-colors touch-target whitespace-nowrap"
+              >
+                Limpiar
+              </button>
+            )}
+          </div>
+        </div>
+
+        {loading ? (
+          <div className="flex items-center justify-center py-20">
+            <svg className="w-8 h-8 text-accent animate-spin" fill="none" viewBox="0 0 24 24">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+            </svg>
+          </div>
+        ) : (
+          <>
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
+              <div className="bg-surface rounded-xl border border-border p-4">
+                <p className="text-xs font-medium text-text-muted uppercase tracking-wider mb-1">Registros</p>
+                <p className="text-2xl font-bold font-display text-text">{metrics.totalRegistros}</p>
+              </div>
+              <div className="bg-surface rounded-xl border border-border p-4">
+                <p className="text-xs font-medium text-text-muted uppercase tracking-wider mb-1">Litros</p>
+                <p className="text-2xl font-bold font-display text-text">{metrics.totalLitros.toFixed(1)} L</p>
+              </div>
+              <div className="bg-surface rounded-xl border border-border p-4">
+                <p className="text-xs font-medium text-text-muted uppercase tracking-wider mb-1">Importe Total</p>
+                <p className="text-2xl font-bold font-display text-accent">{formatCurrency(metrics.totalImporte)}</p>
+              </div>
+              <div className="bg-surface rounded-xl border border-border p-4">
+                <p className="text-xs font-medium text-text-muted uppercase tracking-wider mb-1">Conductores</p>
+                <p className="text-2xl font-bold font-display text-text">{metrics.conductores}</p>
+              </div>
+            </div>
+
+            {porConductor.length > 0 && (
+              <div className="bg-surface rounded-xl border border-border p-4 mb-6">
+                <h2 className="text-sm font-bold text-text mb-3 uppercase tracking-wider">Por Conductor</h2>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b border-border">
+                        <th className="text-left py-2 pr-4 text-text-muted font-medium">Conductor</th>
+                        <th className="text-right py-2 px-4 text-text-muted font-medium">Registros</th>
+                        <th className="text-right py-2 px-4 text-text-muted font-medium">Litros</th>
+                        <th className="text-right py-2 pl-4 text-text-muted font-medium">Importe</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {porConductor.map(c => (
+                        <tr key={c.nombre} className="border-b border-border/50 last:border-0">
+                          <td className="py-2 pr-4 text-text font-medium">{c.nombre}</td>
+                          <td className="py-2 px-4 text-right text-text">{c.registros}</td>
+                          <td className="py-2 px-4 text-right text-text">{c.litros.toFixed(1)} L</td>
+                          <td className="py-2 pl-4 text-right text-accent font-bold">{formatCurrency(c.importe)}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+
+            <div className="bg-surface rounded-xl border border-border overflow-hidden">
+              <div className="p-4 border-b border-border">
+                <h2 className="text-sm font-bold text-text uppercase tracking-wider">
+                  Todos los Registros {filtered.length > 0 && <span className="text-text-muted font-normal">({filtered.length})</span>}
+                </h2>
+              </div>
+              {filtered.length === 0 ? (
+                <div className="p-8 text-center">
+                  <svg className="w-12 h-12 text-surface-2 mx-auto mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                  <p className="text-sm text-text-muted">No hay registros en este período</p>
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b border-border bg-bg/50">
+                        <th className="text-left py-3 px-4 text-text-muted font-medium whitespace-nowrap">Fecha</th>
+                        <th className="text-left py-3 px-4 text-text-muted font-medium whitespace-nowrap">Conductor</th>
+                        <th className="text-left py-3 px-4 text-text-muted font-medium whitespace-nowrap">Vehículo</th>
+                        <th className="text-right py-3 px-4 text-text-muted font-medium whitespace-nowrap">Litros</th>
+                        <th className="text-right py-3 px-4 text-text-muted font-medium whitespace-nowrap">Importe</th>
+                        <th className="text-center py-3 px-4 text-text-muted font-medium whitespace-nowrap">Sync</th>
+                        <th className="py-3 px-4" />
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {filtered.map(r => {
+                        const conductor = USUARIOS.find(u => u.username === r.userId);
+                        return (
+                          <tr key={r.id} className="border-b border-border/50 hover:bg-bg/30 transition-colors">
+                            <td className="py-3 px-4 text-text whitespace-nowrap">{formatDate(r.fechaCreacion)}</td>
+                            <td className="py-3 px-4 text-text">{conductor?.nombre || r.userId}</td>
+                            <td className="py-3 px-4 text-text">{r.vehiculoNombre}</td>
+                            <td className="py-3 px-4 text-right text-text whitespace-nowrap">{r.litros?.toFixed(1) || '0'} L</td>
+                            <td className="py-3 px-4 text-right text-accent font-bold whitespace-nowrap">{formatCurrency(r.importeTotal || 0)}</td>
+                            <td className="py-3 px-4 text-center">
+                              <span className={`inline-block w-2 h-2 rounded-full ${r.sincronizado ? 'bg-success' : 'bg-accent'}`} />
+                            </td>
+                            <td className="py-3 px-4">
+                              <a
+                                href={`/reportes/${r.id}`}
+                                className="text-accent hover:underline text-xs font-medium touch-target inline-flex items-center gap-1"
+                              >
+                                Ver
+                                <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                                </svg>
+                              </a>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          </>
+        )}
+      </main>
+    </div>
+  );
+}

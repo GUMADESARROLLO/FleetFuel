@@ -28,7 +28,7 @@ export async function saveRegistroDB(registro: RegistroCombustible): Promise<voi
   });
 }
 
-export async function getAllRegistrosDB(userId: string): Promise<RegistroCombustible[]> {
+export async function getAllRegistrosDB(userId?: string): Promise<RegistroCombustible[]> {
   const db = await openDB();
   return new Promise((resolve, reject) => {
     const tx = db.transaction(STORE_NAME, 'readonly');
@@ -36,7 +36,7 @@ export async function getAllRegistrosDB(userId: string): Promise<RegistroCombust
     const request = store.getAll();
     request.onsuccess = () => {
       const all = request.result as RegistroCombustible[];
-      resolve(all.filter(r => r.userId === userId));
+      resolve(userId ? all.filter(r => r.userId === userId) : all);
     };
     request.onerror = () => reject(request.error);
   });

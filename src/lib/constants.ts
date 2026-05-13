@@ -26,7 +26,15 @@ export const SUB_PROYECTOS = [
   'Operaciones Generales',
 ];
 
-export const USUARIOS = [
-  { username: 'conductor1', password: 'flota2024', nombre: 'Carlos Mejía' },
-  { username: 'conductor2', password: 'flota2024', nombre: 'Ana López' },
+export interface UsuarioConfig {
+  username: string;
+  password: string;
+  nombre: string;
+  role: 'admin' | 'conductor';
+}
+
+export const USUARIOS: UsuarioConfig[] = [
+  { username: 'admin', password: 'admin2024', nombre: 'Administrador', role: 'admin' },
+  { username: 'conductor1', password: 'flota2024', nombre: 'Carlos Mejía', role: 'conductor' },
+  { username: 'conductor2', password: 'flota2024', nombre: 'Ana López', role: 'conductor' },
 ];

@@ -28,7 +28,7 @@ export default function LoginForm() {
 
       const session = login(trimmedUser, trimmedPass);
       if (session) {
-        window.location.href = '/dashboard';
+        window.location.href = session.role === 'admin' ? '/admin/dashboard' : '/dashboard';
       } else {
         setError('Credenciales incorrectas. Intenta de nuevo.');
         setShake(true);

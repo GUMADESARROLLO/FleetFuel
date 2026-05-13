@@ -5,7 +5,7 @@ import { saveRegistroDB, getAllRegistrosDB, getRegistroByIdDB } from './idb';
 const DRAFT_KEY = 'fleetfuel_draft';
 const PENDING_SYNC_KEY = 'fleetfuel_pending_sync';
 
-export async function getRegistros(userId: string): Promise<RegistroCombustible[]> {
+export async function getRegistros(userId?: string): Promise<RegistroCombustible[]> {
   if (typeof window === 'undefined') return [];
   try {
     return await getAllRegistrosDB(userId);

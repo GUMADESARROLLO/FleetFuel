@@ -6,6 +6,7 @@ export interface User {
 export interface Session {
   username: string;
   nombre: string;
+  role: 'admin' | 'conductor';
   loggedInAt: string;
 }
 

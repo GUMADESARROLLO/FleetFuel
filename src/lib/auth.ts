@@ -12,6 +12,7 @@ export function login(username: string, password: string): Session | null {
   const session: Session = {
     username: user.username,
     nombre: user.nombre,
+    role: user.role,
     loggedInAt: new Date().toISOString(),
   };
 
@@ -20,6 +21,11 @@ export function login(username: string, password: string): Session | null {
   }
 
   return session;
+}
+
+export function isAdmin(): boolean {
+  const session = getSession();
+  return session?.role === 'admin';
 }
 
 export function logout(): void {

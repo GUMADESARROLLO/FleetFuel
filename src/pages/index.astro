@@ -5,9 +5,14 @@ import StickyHeader from '../components/StickyHeader';
 
 <AppLayout>
   <script slot="head">
-    const session = localStorage.getItem('fleetfuel_session');
-    if (session) {
-      window.location.href = '/dashboard';
+    const raw = localStorage.getItem('fleetfuel_session');
+    if (raw) {
+      try {
+        const session = JSON.parse(raw);
+        window.location.href = session.role === 'admin' ? '/admin/dashboard' : '/dashboard';
+      } catch {
+        window.location.href = '/login';
+      }
     } else {
       window.location.href = '/login';
     }

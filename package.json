@@ -7,7 +7,10 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "check": "astro check"
+    "check": "astro check",
+    "db:migrate": "tsx src/db/migrate.ts",
+    "db:seed": "tsx src/db/seed.ts",
+    "db:init": "tsx src/db/migrate.ts && tsx src/db/seed.ts"
   },
   "dependencies": {
     "@astrojs/node": "^10.1.1",
@@ -16,6 +19,7 @@
     "@vite-pwa/astro": "^1.0.0",
     "astro": "^6.3.0",
     "date-fns": "^4.1.0",
+    "mysql2": "^3.22.3",
     "react": "^19.1.0",
     "react-datepicker": "^9.1.0",
     "react-dom": "^19.1.0",
@@ -23,6 +27,7 @@
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.4",
+    "tsx": "^4.21.0",
     "typescript": "^5.8.0"
   }
 }

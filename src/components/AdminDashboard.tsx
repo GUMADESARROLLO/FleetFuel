@@ -2,7 +2,6 @@ import { useEffect, useState, useMemo } from 'react';
 import DatePicker from 'react-datepicker';
 import { es } from 'date-fns/locale';
 import { format } from 'date-fns';
-import 'react-datepicker/dist/react-datepicker.css';
 import { getSession, requireAuth, isAdmin, logout } from '../lib/auth';
 import { formatCurrency, formatDate } from '../lib/storage';
 import { apiGetRegistros } from '../lib/api';

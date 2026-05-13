@@ -42,6 +42,7 @@ export default function NuevoRegistroWizard() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [toast, setToast] = useState({ visible: false, message: '', type: 'success' as 'success' | 'error' | 'info' });
   const [saved, setSaved] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
@@ -122,53 +123,89 @@ export default function NuevoRegistroWizard() {
       return;
     }
 
-    const vehiculo = VEHICULOS.find((v) => v.id === form.vehiculoId);
+    setSaving(true);
 
-    const registro: RegistroCombustible = {
-      id: generateId(),
-      userId: session.username,
-      fechaCreacion: new Date().toISOString(),
-      fotoOdometroAntes: form.fotoOdometroAntes,
-      fotoOdometroDespues: form.fotoOdometroDespues,
-      fotoFactura: form.fotoFactura,
-      fotoVoucher: form.fotoVoucher,
-      vehiculoId: form.vehiculoId,
-      vehiculoNombre: vehiculo?.nombre || '',
-      vehiculoPlaca: vehiculo?.placa || '',
-      tipoCombustible: form.tipoCombustible,
-      proveedor: form.proveedor,
-      subProyecto: form.subProyecto,
-      kilometraje: parseInt(form.kilometraje) || 0,
-      fechaFactura: form.fechaFactura,
-      numeroFactura: form.numeroFactura,
-      numeroVoucher: form.numeroVoucher,
-      gravadas: parseFloat(form.gravadas || '0'),
-      isr: parseFloat(form.isr || '0'),
-      excedentes: parseFloat(form.excedentes || '0'),
-      litros: parseFloat(form.litros || '0'),
-      importeTotal: parseFloat(form.importeTotal || '0'),
-      rutaRecorrida: form.rutaRecorrida,
-      sincronizado: navigator.onLine,
-    };
+    try {
+      const vehiculo = VEHICULOS.find((v) => v.id === form.vehiculoId);
 
-    await saveRegistro(session.username, registro);
+      const registro: RegistroCombustible = {
+        id: generateId(),
+        userId: session.username,
+        fechaCreacion: new Date().toISOString(),
+        fotoOdometroAntes: form.fotoOdometroAntes,
+        fotoOdometroDespues: form.fotoOdometroDespues,
+        fotoFactura: form.fotoFactura,
+        fotoVoucher: form.fotoVoucher,
+        vehiculoId: form.vehiculoId,
+        vehiculoNombre: vehiculo?.nombre || '',
+        vehiculoPlaca: vehiculo?.placa || '',
+        tipoCombustible: form.tipoCombustible,
+        proveedor: form.proveedor,
+        subProyecto: form.subProyecto,
+        kilometraje: parseInt(form.kilometraje) || 0,
+        fechaFactura: form.fechaFactura,
+        numeroFactura: form.numeroFactura,
+        numeroVoucher: form.numeroVoucher,
+        gravadas: parseFloat(form.gravadas || '0'),
+        isr: parseFloat(form.isr || '0'),
+        excedentes: parseFloat(form.excedentes || '0'),
+        litros: parseFloat(form.litros || '0'),
+        importeTotal: parseFloat(form.importeTotal || '0'),
+        rutaRecorrida: form.rutaRecorrida,
+        sincronizado: navigator.onLine,
+      };
 
-    if (!navigator.onLine) {
-      markPendingSync(registro.id);
-      setToast({ visible: true, message: 'Guardado localmente, se sincronizará al recuperar conexión', type: 'offline' });
-    } else {
-      setToast({ visible: true, message: '¡Registro guardado correctamente!', type: 'success' });
+      const [result] = await Promise.all([
+        saveRegistro(session.username, registro),
+        new Promise(r => setTimeout(r, 900)),
+      ]);
+
+      if (!navigator.onLine) {
+        markPendingSync(registro.id);
+        setToast({ visible: true, message: 'Guardado localmente, se sincronizará al recuperar conexión', type: 'offline' });
+      } else {
+        setToast({ visible: true, message: '¡Registro guardado correctamente!', type: 'success' });
+      }
+
+      clearDraft();
+      setSaving(false);
+      setSaved(true);
+
+      setTimeout(() => {
+        window.location.href = '/reportes';
+      }, 2000);
+    } catch (err) {
+      setSaving(false);
+      setToast({ visible: true, message: 'Error al guardar. Intenta de nuevo.', type: 'error' });
     }
-
-    clearDraft();
-    setSaved(true);
-
-    setTimeout(() => {
-      window.location.href = '/reportes';
-    }, 2000);
   };
 
-  if (saved) return null;
+  if (saved) {
+    return (
+      <div className="px-4 py-4 max-w-lg mx-auto">
+        <div className="flex flex-col items-center justify-center min-h-[60vh]">
+          <div className="w-16 h-16 rounded-full bg-success/15 flex items-center justify-center mb-4">
+            <svg className="w-8 h-8 text-success" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+            </svg>
+          </div>
+          <p className="text-lg font-bold text-text text-center">
+            {navigator.onLine
+              ? 'Registro guardado correctamente'
+              : 'Registro guardado localmente'}
+          </p>
+          <p className="text-sm text-text-muted text-center mt-1">Redirigiendo...</p>
+        </div>
+        <Toast
+          visible={toast.visible}
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast((t) => ({ ...t, visible: false }))}
+          duration={4000}
+        />
+      </div>
+    );
+  }
 
   const isStep2Valid = form.vehiculoId && form.tipoCombustible && form.proveedor && form.subProyecto && form.kilometraje && form.fechaFactura;
   const isStep1Valid = form.fotoOdometroAntes && form.fotoOdometroDespues;
@@ -488,12 +525,25 @@ export default function NuevoRegistroWizard() {
           <div className="flex flex-col gap-3 mt-6">
             <button
               onClick={handleSave}
-              className="w-full h-12 bg-accent hover:bg-accent/90 text-white font-bold rounded-xl transition-colors touch-target flex items-center justify-center gap-2"
+              disabled={saving}
+              className={`w-full h-12 bg-accent hover:bg-accent/90 disabled:opacity-60 disabled:cursor-not-allowed text-white font-bold rounded-xl transition-all touch-target flex items-center justify-center gap-2 ${saving ? 'animate-pulse-glow' : ''}`}
             >
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-              </svg>
-              Guardar Registro
+              {saving ? (
+                <>
+                  <svg className="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                  </svg>
+                  <span>Guardando...</span>
+                </>
+              ) : (
+                <>
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                  </svg>
+                  <span>Guardar Registro</span>
+                </>
+              )}
             </button>
             <button
               onClick={() => (window.location.href = '/dashboard')}

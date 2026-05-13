@@ -1,0 +1,41 @@
+services:
+  astro-app:
+    container_name: cn-fleetfuel-app
+    image: node:21.6.1-alpine
+    volumes:
+      - ./.:/app
+    working_dir: /app
+    ports:
+      - '3000:3000'
+    command: ["npm","run","dev","--","--host"]
+
+  db:
+    container_name: cn_fleetfuel_db
+    image: mysql:8.0
+    command: mysqld --default-authentication-plugin=mysql_native_password --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    restart: always
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_HOST: '%'
+      MYSQL_DATABASE: db_fleetfuel
+      MYSQL_USER: usr_fleetfuel
+      MYSQL_PASSWORD: pwd_fleetfuel
+      MYSQL_ROOT_PASSWORD: pwd_fleetfuel
+    volumes:
+      - ./db_data:/var/lib/mysql
+
+  phpmyadmin:
+    container_name: cn_fleetfuel_phpmyadmin
+    image: phpmyadmin/phpmyadmin:5.2
+    restart: always
+    environment:
+      PMA_HOST: db
+      PMA_PORT: 3306
+      MYSQL_ROOT_PASSWORD: pwd_fleetfuel
+      UPLOAD_LIMIT: 300M
+    ports:
+      - "82:80"
+    depends_on:
+      - db
+

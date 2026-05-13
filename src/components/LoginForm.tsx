@@ -26,7 +26,7 @@ export default function LoginForm() {
         return;
       }
 
-      const session = login(trimmedUser, trimmedPass);
+      const session = await login(trimmedUser, trimmedPass);
       if (session) {
         window.location.href = session.role === 'admin' ? '/admin/dashboard' : '/dashboard';
       } else {

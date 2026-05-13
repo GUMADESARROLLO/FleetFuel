@@ -1,26 +1,38 @@
 import type { Session, User } from './types';
-import { USUARIOS } from './constants';
 
 const SESSION_KEY = 'fleetfuel_session';
 
-export function login(username: string, password: string): Session | null {
-  const user = USUARIOS.find(
-    (u) => u.username === username && u.password === password
-  );
-  if (!user) return null;
+export async function login(username: string, password: string): Promise<Session | null> {
+  if (typeof window === 'undefined') return null;
 
-  const session: Session = {
-    username: user.username,
-    nombre: user.nombre,
-    role: user.role,
-    loggedInAt: new Date().toISOString(),
-  };
+  try {
+    console.log('[auth] Calling API login for', username);
+    const res = await fetch('/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, password }),
+    });
 
-  if (typeof window !== 'undefined') {
+    console.log('[auth] API response status:', res.status);
+
+    if (res.status === 401) {
+      console.log('[auth] Invalid credentials');
+      return null;
+    }
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      console.log('[auth] API error:', res.status, errData);
+      return null;
+    }
+
+    const session: Session = await res.json();
+    console.log('[auth] Login success for', session.nombre, 'role:', session.role);
     localStorage.setItem(SESSION_KEY, JSON.stringify(session));
+    return session;
+  } catch (err) {
+    console.log('[auth] Network error:', err);
+    return null;
   }
-
-  return session;
 }
 
 export function isAdmin(): boolean {

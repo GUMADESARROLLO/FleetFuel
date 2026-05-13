@@ -218,7 +218,7 @@ export default function NuevoRegistroWizard() {
         <div className="animate-fade-in">
           <h2 className="text-lg font-bold font-display text-text mb-4">Evidencia Fotográfica</h2>
           <p className="text-sm text-text-muted mb-6">Toma o selecciona fotos de cada evidencia requerida</p>
-          <div className="grid grid-cols-2 gap-4 mb-6">
+          <div className="grid grid-cols-1 gap-4 mb-6">
             <PhotoUpload
               label="Odómetro Antes"
               value={form.fotoOdometroAntes}

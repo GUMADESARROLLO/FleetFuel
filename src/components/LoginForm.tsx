@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { login } from '../lib/auth';
+import { useEffect, useState } from 'react';
+import { isAuthenticated, login, getSession } from '../lib/auth';
 
 export default function LoginForm() {
   const [username, setUsername] = useState('');
@@ -8,6 +8,13 @@ export default function LoginForm() {
   const [error, setError] = useState('');
   const [shake, setShake] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (isAuthenticated()) {
+      const session = getSession();
+      window.location.href = session?.role === 'admin' ? '/admin/dashboard' : '/dashboard';
+    }
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

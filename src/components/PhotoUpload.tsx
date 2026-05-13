@@ -65,8 +65,8 @@ export default function PhotoUpload({ label, value, onChange, shape = 'rect', re
   };
 
   return (
-    <div className="flex flex-col items-center gap-2">
-      <p className="text-sm font-medium text-text-muted text-center">
+    <div className="flex flex-col gap-1.5">
+      <p className="text-sm font-medium text-text-muted">
         {label}
         {required && <span className="text-danger ml-0.5">*</span>}
       </p>
@@ -75,7 +75,7 @@ export default function PhotoUpload({ label, value, onChange, shape = 'rect', re
         onClick={() => inputRef.current?.click()}
         onDragOver={(e) => e.preventDefault()}
         onDrop={handleDrop}
-        className={`relative w-24 h-24 ${
+        className={`relative w-full h-40 ${
           shape === 'circle' ? 'rounded-full' : 'rounded-xl'
         } border-2 border-dashed transition-all duration-200 overflow-hidden ${
           value ? 'border-accent bg-accent/5' : 'border-border hover:border-accent/50 bg-surface'
@@ -97,12 +97,12 @@ export default function PhotoUpload({ label, value, onChange, shape = 'rect', re
             </div>
           </>
         ) : (
-          <div className="flex flex-col items-center justify-center h-full gap-1">
-            <svg className="w-7 h-7 text-text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <div className="flex flex-col items-center justify-center h-full gap-2">
+            <svg className="w-10 h-10 text-text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
             </svg>
-            <span className="text-[10px] text-text-muted text-center px-1 leading-tight">Toca para foto</span>
+            <span className="text-xs text-text-muted text-center px-2 leading-tight">Toca para tomar foto</span>
           </div>
         )}
       </button>

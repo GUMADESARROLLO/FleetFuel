@@ -1,0 +1,15 @@
+---
+import AppLayout from '../layouts/AppLayout.astro';
+import StickyHeader from '../components/StickyHeader';
+---
+
+<AppLayout>
+  <script slot="head">
+    const session = localStorage.getItem('fleetfuel_session');
+    if (session) {
+      window.location.href = '/dashboard';
+    } else {
+      window.location.href = '/login';
+    }
+  </script>
+</AppLayout>

@@ -1,0 +1,68 @@
+---
+import '../styles/global.css';
+import InstallPrompt from '../components/InstallPrompt';
+
+export interface Props {
+  title?: string;
+  hideNav?: boolean;
+  hideHeader?: boolean;
+}
+
+const { title, hideNav } = Astro.props;
+const pageTitle = title ? `${title} - FleetFuel` : 'FleetFuel';
+---
+
+<!DOCTYPE html>
+<html lang="es-MX">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#F97316" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="FleetFuel" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="description" content="Control total de tu flota, en la palma de tu mano" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=DM+Sans:wght@400;500;600;700&display=swap" as="style" crossorigin />
+    <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <slot name="head" />
+    <title>{pageTitle}</title>
+  </head>
+  <body class="bg-bg text-text min-h-screen safe-area-top safe-area-bottom">
+    <slot name="header" />
+    <main class={hideNav ? '' : 'pb-20'}>
+      <slot />
+    </main>
+    <slot name="nav" />
+    <InstallPrompt client:load />
+    <script>
+      window.addEventListener('online', () => {
+        const pending = localStorage.getItem('fleetfuel_pending_sync');
+        if (pending) {
+          try {
+            const ids = JSON.parse(pending);
+            if (ids.length > 0) {
+              localStorage.setItem('fleetfuel_pending_sync', JSON.stringify([]));
+              window.dispatchEvent(new CustomEvent('fleetfuel-synced', { detail: ids }));
+            }
+          } catch (e) {}
+        }
+        document.body.classList.remove('is-offline');
+        document.body.classList.add('is-online');
+      });
+
+      window.addEventListener('offline', () => {
+        document.body.classList.add('is-offline');
+        document.body.classList.remove('is-online');
+      });
+
+      if (!navigator.onLine) {
+        document.body.classList.add('is-offline');
+      }
+    </script>
+  </body>
+</html>

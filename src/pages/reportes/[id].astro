@@ -1,0 +1,18 @@
+---
+import AppLayout from '../../layouts/AppLayout.astro';
+import StickyHeader from '../../components/StickyHeader';
+import BottomNav from '../../components/BottomNav';
+import ReporteDetalle from '../../components/ReporteDetalle';
+
+const id = Astro.params.id as string;
+---
+
+<AppLayout title="Detalle de Reporte">
+  <fragment slot="header">
+    <StickyHeader title="Detalle" client:load showBack />
+  </fragment>
+  <ReporteDetalle client:load id={id} />
+  <fragment slot="nav">
+    <BottomNav client:load />
+  </fragment>
+</AppLayout>

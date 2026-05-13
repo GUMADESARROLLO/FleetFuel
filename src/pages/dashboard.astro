@@ -1,0 +1,16 @@
+---
+import AppLayout from '../layouts/AppLayout.astro';
+import StickyHeader from '../components/StickyHeader';
+import BottomNav from '../components/BottomNav';
+import DashboardContent from '../components/DashboardContent';
+---
+
+<AppLayout title="Dashboard">
+  <fragment slot="header">
+    <StickyHeader client:load />
+  </fragment>
+  <DashboardContent client:load />
+  <fragment slot="nav">
+    <BottomNav client:load />
+  </fragment>
+</AppLayout>

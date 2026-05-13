@@ -6,11 +6,13 @@ import type { RegistroCombustible } from '../lib/types';
 export default function ReporteDetalle({ id }: { id: string }) {
   const [registro, setRegistro] = useState<RegistroCombustible | null>(null);
   const [lightboxImg, setLightboxImg] = useState<string | null>(null);
+  const [backUrl, setBackUrl] = useState('/reportes');
 
   useEffect(() => {
     requireAuth();
     const session = getSession();
     if (!session) return;
+    setBackUrl(session.role === 'admin' ? '/admin/dashboard' : '/reportes');
     (async () => {
       const r = await getRegistroById(session.username, id);
       setRegistro(r || null);
@@ -24,7 +26,7 @@ export default function ReporteDetalle({ id }: { id: string }) {
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
         </svg>
         <p className="text-text-muted">Registro no encontrado</p>
-        <a href="/reportes" className="inline-block mt-4 text-accent font-medium hover:underline">Volver a Reportes</a>
+        <a href={backUrl} className="inline-block mt-4 text-accent font-medium hover:underline">Retroceder</a>
       </div>
     );
   }
@@ -39,13 +41,13 @@ export default function ReporteDetalle({ id }: { id: string }) {
   return (
     <div className="px-4 py-4 max-w-lg mx-auto">
       <a
-        href="/reportes"
+        href={backUrl}
         className="inline-flex items-center gap-1.5 text-sm text-accent font-medium hover:underline mb-4 touch-target"
       >
         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
         </svg>
-        Volver a Reportes
+        Retroceder
       </a>
 
       <div className="grid grid-cols-2 gap-2 mb-6">

@@ -1,7 +1,7 @@
 services:
   astro-app:
     container_name: cn-fleetfuel-app
-    image: node:21.6.1-alpine
+    image: node:24.15.0-alpine
     volumes:
       - ./.:/app
     working_dir: /app

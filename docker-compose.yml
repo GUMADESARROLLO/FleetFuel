@@ -5,7 +5,7 @@ services:
       context: .
       dockerfile: Dockerfile
     ports:
-      - '${git :-8188}:4321'
+      - '8188:4321'
     environment:
       HOST: '0.0.0.0'
       PORT: '4321'

@@ -4,22 +4,19 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    # volumes:
-    #   - ./.:/app
-    # working_dir: /app
     ports:
-      - '8188:4321'
+      - '${APP_PORT:-8188}:4321'
     environment:
       HOST: '0.0.0.0'
       PORT: '4321'
-      DB_HOST: db
-      DB_PORT: '3306'
-      DB_USER: usr_fleetfuel
-      DB_PASSWORD: pwd_fleetfuel
-      DB_NAME: db_fleetfuel
-    #depends_on:
-    #  db:
-    #    condition: service_healthy
+      DB_HOST: $git {DB_HOST:-db}
+      DB_PORT: ${DB_PORT:-3306}
+      DB_USER: ${DB_USER:-usr_fleetfuel}
+      DB_PASSWORD: ${DB_PASSWORD:-pwd_fleetfuel}
+      DB_NAME: ${DB_NAME:-db_fleetfuel}
+    depends_on:
+      db:
+        condition: service_healthy
     restart: unless-stopped
 
   db:
@@ -28,13 +25,13 @@ services:
     command: mysqld --default-authentication-plugin=mysql_native_password --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
     restart: unless-stopped
     ports:
-      - '3307:3306'
+      - '${DB_PORT_EXTERNAL:-3307}:3306'
     environment:
       MYSQL_ROOT_HOST: '%'
-      MYSQL_DATABASE: db_fleetfuel
-      MYSQL_USER: usr_fleetfuel
-      MYSQL_PASSWORD: pwd_fleetfuel
-      MYSQL_ROOT_PASSWORD: pwd_fleetfuel
+      MYSQL_DATABASE: ${DB_NAME:-db_fleetfuel}
+      MYSQL_USER: ${DB_USER:-usr_fleetfuel}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-pwd_fleetfuel}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-pwd_fleetfuel}
     volumes:
       - db_data:/var/lib/mysql
       - ./scripts/db/init.sql:/docker-entrypoint-initdb.d/init.sql
@@ -51,10 +48,10 @@ services:
     environment:
       PMA_HOST: db
       PMA_PORT: 3306
-      MYSQL_ROOT_PASSWORD: pwd_fleetfuel
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-pwd_fleetfuel}
       UPLOAD_LIMIT: 300M
     ports:
-      - '82:80'
+      - '${PMA_PORT:-82}:80'
     depends_on:
       - db
 

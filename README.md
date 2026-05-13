@@ -77,6 +77,9 @@ npm run dev
 git clone <repo> fleetfuel
 cd fleetfuel
 
+# Crear .env desde la plantilla (ajustar credenciales si se desea)
+cp .env.example .env
+
 # Iniciar todos los servicios (app, db, phpmyadmin)
 docker compose up -d
 
@@ -93,10 +96,26 @@ docker compose down
 docker compose down -v
 ```
 
+### Variables de entorno (`.env`)
+
+Docker Compose lee automáticamente el archivo `.env`. Todas las variables tienen defaults:
+
+| Variable | Default (Docker) | Descripción |
+|----------|-----------------|-------------|
+| `DB_HOST` | `db` | Host de MySQL (nombre del servicio) |
+| `DB_PORT` | `3306` | Puerto interno de MySQL |
+| `DB_USER` | `usr_fleetfuel` | Usuario de MySQL |
+| `DB_PASSWORD` | `pwd_fleetfuel` | Contraseña de MySQL |
+| `DB_NAME` | `db_fleetfuel` | Nombre de la base de datos |
+| `DB_ROOT_PASSWORD` | `pwd_fleetfuel` | Contraseña root de MySQL |
+| `APP_PORT` | `8188` | Puerto de la app en el host |
+| `DB_PORT_EXTERNAL` | `3307` | Puerto de MySQL en el host |
+| `PMA_PORT` | `82` | Puerto de phpMyAdmin en el host |
+
 ### Servicios
 
-| Servicio | Puerto | Descripción |
-|----------|--------|-------------|
+| Servicio | Puerto (host) | Descripción |
+|----------|--------------|-------------|
 | `app` | `8188` | FleetFuel (Astro SSR en producción) |
 | `db` | `3307` | MySQL 8.0 |
 | `phpmyadmin` | `82` | Administrador de base de datos |

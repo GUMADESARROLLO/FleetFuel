@@ -182,9 +182,9 @@ export function generateId(): string {
 }
 
 export function formatCurrency(value: number): string {
-  return new Intl.NumberFormat('es-MX', {
+  return new Intl.NumberFormat('es-NI', {
     style: 'currency',
-    currency: 'MXN',
+    currency: 'NIO',
     minimumFractionDigits: 2,
   }).format(value);
 }

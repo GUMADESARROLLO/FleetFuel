@@ -6,7 +6,7 @@ import {
   PROVEEDORES,
   SUB_PROYECTOS,
 } from '../lib/constants';
-import { saveRegistro, saveDraft, getDraft, clearDraft, generateId, markPendingSync } from '../lib/storage';
+import { saveRegistro, saveDraft, getDraft, clearDraft, generateId, markPendingSync, formatCurrency } from '../lib/storage';
 import type { DraftRegistro, RegistroCombustible } from '../lib/types';
 import StepProgress from './StepProgress';
 import PhotoUpload from './PhotoUpload';
@@ -475,7 +475,7 @@ export default function NuevoRegistroWizard() {
                 </div>
                 <div>
                   <p className="text-[10px] text-text-muted uppercase">Importe</p>
-                  <p className="text-accent font-bold">${parseFloat(form.importeTotal || '0').toFixed(2)}</p>
+                  <p className="text-accent font-bold">{formatCurrency(parseFloat(form.importeTotal || '0'))}</p>
                 </div>
               </div>
               <div>

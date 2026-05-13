@@ -53,22 +53,11 @@ src/
 
 ## Requisitos
 
-- Node.js 18+
-- MySQL 8.0
+- Node.js >= 22.12.0
+- Docker y Docker Compose (para producción)
+- MySQL 8.0 (para desarrollo local)
 
-## Variables de entorno
-
-Copia `.env.example` a `.env` y configura:
-
-```
-DB_HOST=localhost
-DB_PORT=3306
-DB_USER=root
-DB_PASSWORD=tu_password
-DB_NAME=fleetfuel
-```
-
-## Inicio rápido
+## Inicio rápido (desarrollo local)
 
 ```bash
 # Instalar dependencias
@@ -80,6 +69,39 @@ npm run db:init
 # Iniciar servidor de desarrollo
 npm run dev
 ```
+
+## Producción con Docker
+
+```bash
+# Clonar y entrar al proyecto
+git clone <repo> fleetfuel
+cd fleetfuel
+
+# Iniciar todos los servicios (app, db, phpmyadmin)
+docker compose up -d
+
+# La app estará disponible en http://localhost:8188
+# phpMyAdmin en http://localhost:82
+
+# Ver logs
+docker compose logs -f app
+
+# Detener servicios
+docker compose down
+
+# Detener y eliminar datos de la base de datos
+docker compose down -v
+```
+
+### Servicios
+
+| Servicio | Puerto | Descripción |
+|----------|--------|-------------|
+| `app` | `8188` | FleetFuel (Astro SSR en producción) |
+| `db` | `3307` | MySQL 8.0 |
+| `phpmyadmin` | `82` | Administrador de base de datos |
+
+La base de datos se inicializa automáticamente en el primer inicio (esquema + usuarios por defecto).
 
 ## Scripts disponibles
 

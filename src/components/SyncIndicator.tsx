@@ -1,6 +1,5 @@
 import { useEffect, useState, useRef } from 'react';
-import { getPendingSyncIds, clearAllPendingSync } from '../lib/storage';
-import { updateSyncStatusBatchDB } from '../lib/idb';
+import { getPendingSyncIds, clearAllPendingSync, syncPendingRegistros } from '../lib/storage';
 
 type SyncState = 'idle' | 'pending' | 'syncing' | 'complete';
 
@@ -20,11 +19,8 @@ export default function SyncIndicator() {
     setCount(ids.length);
     setProgress(0);
 
-    for (let i = 0; i < ids.length; i++) {
-      await updateSyncStatusBatchDB([ids[i]], true);
-      setProgress(i + 1);
-      await new Promise(r => setTimeout(r, 300));
-    }
+    await syncPendingRegistros(ids);
+    setProgress(ids.length);
 
     clearAllPendingSync();
     setState('complete');

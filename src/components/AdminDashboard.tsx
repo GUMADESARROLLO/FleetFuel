@@ -4,7 +4,8 @@ import { es } from 'date-fns/locale';
 import { format } from 'date-fns';
 import 'react-datepicker/dist/react-datepicker.css';
 import { getSession, requireAuth, isAdmin, logout } from '../lib/auth';
-import { getRegistros, formatCurrency, formatDate } from '../lib/storage';
+import { formatCurrency, formatDate } from '../lib/storage';
+import { apiGetRegistros } from '../lib/api';
 import { USUARIOS } from '../lib/constants';
 import type { RegistroCombustible, Session } from '../lib/types';
 
@@ -33,7 +34,7 @@ export default function AdminDashboard() {
     if (!session) return;
     (async () => {
       setLoading(true);
-      const all = await getRegistros();
+      const all = await apiGetRegistros();
       setRegistros(all);
       setLoading(false);
     })();

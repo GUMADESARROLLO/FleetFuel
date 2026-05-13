@@ -1,12 +1,20 @@
 import type { RegistroCombustible, DraftRegistro } from './types';
 import { VEHICULOS } from './constants';
 import { saveRegistroDB, getAllRegistrosDB, getRegistroByIdDB } from './idb';
+import { apiGetRegistros, apiGetRegistroById, apiSaveRegistro, apiSyncRegistros } from './api';
 
 const DRAFT_KEY = 'fleetfuel_draft';
 const PENDING_SYNC_KEY = 'fleetfuel_pending_sync';
 
 export async function getRegistros(userId?: string): Promise<RegistroCombustible[]> {
   if (typeof window === 'undefined') return [];
+  if (navigator.onLine) {
+    try {
+      return await apiGetRegistros(userId ? { userId } : undefined);
+    } catch {
+      return await getAllRegistrosDB(userId).catch(() => []);
+    }
+  }
   try {
     return await getAllRegistrosDB(userId);
   } catch {
@@ -20,6 +28,15 @@ export async function saveRegistro(
 ): Promise<void> {
   if (typeof window === 'undefined') return;
   await saveRegistroDB(registro);
+  if (navigator.onLine) {
+    try {
+      await apiSaveRegistro(registro);
+    } catch {
+      markPendingSync(registro.id);
+    }
+  } else {
+    markPendingSync(registro.id);
+  }
 }
 
 export async function getRegistroById(
@@ -27,10 +44,34 @@ export async function getRegistroById(
   id: string
 ): Promise<RegistroCombustible | undefined> {
   if (typeof window === 'undefined') return undefined;
+  if (navigator.onLine) {
+    try {
+      const apiReg = await apiGetRegistroById(id);
+      if (apiReg) return apiReg;
+    } catch {
+      // fallback to IndexedDB
+    }
+  }
   try {
     return await getRegistroByIdDB(id);
   } catch {
     return undefined;
+  }
+}
+
+export async function syncPendingRegistros(ids: string[]): Promise<void> {
+  if (typeof window === 'undefined') return;
+  for (const id of ids) {
+    try {
+      const reg = await getRegistroByIdDB(id);
+      if (reg) {
+        reg.sincronizado = true;
+        await apiSaveRegistro(reg);
+        await saveRegistroDB(reg);
+      }
+    } catch {
+      // skip failed syncs
+    }
   }
 }
 

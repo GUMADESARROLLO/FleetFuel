@@ -50,7 +50,7 @@ export default function DashboardContent() {
         <p className="text-sm text-text-muted">Resumen del mes</p>
       </div>
 
-      <div className="flex gap-3 overflow-x-auto scrollbar-hide pb-2 mb-6 md:grid md:grid-cols-2 md:overflow-x-visible">
+      <div className="grid grid-cols-2 gap-3 mb-6">
         <SummaryCard
           title="Registros"
           value={totalRegistros}

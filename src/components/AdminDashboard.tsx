@@ -1,6 +1,7 @@
 import { useEffect, useState, useMemo } from 'react';
 import DatePicker from 'react-datepicker';
 import { es } from 'date-fns/locale';
+import { format } from 'date-fns';
 import 'react-datepicker/dist/react-datepicker.css';
 import { getSession, requireAuth, isAdmin, logout } from '../lib/auth';
 import { getRegistros, formatCurrency, formatDate } from '../lib/storage';
@@ -112,15 +113,11 @@ export default function AdminDashboard() {
       <main className="px-4 py-4 max-w-6xl mx-auto">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
           <h1 className="text-xl font-bold font-display text-text">Panel de Administración</h1>
-          <a
-            href="/dashboard"
-            className="text-sm text-accent font-medium hover:underline touch-target inline-flex items-center gap-1"
-          >
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
-            </svg>
-            Ir a vista conductor
-          </a>
+          <span className="text-sm text-text-muted font-medium">
+            {dateDesde && dateHasta
+              ? `Periodo: ${format(dateDesde, "d MMM'.' yyyy", { locale: es })} al ${format(dateHasta, "d MMM'.' yyyy", { locale: es })}`
+              : 'Sin filtro de fecha'}
+          </span>
         </div>
 
         <div className="bg-surface rounded-xl border border-border p-4 mb-6">

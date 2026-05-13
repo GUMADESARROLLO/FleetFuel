@@ -1,93 +1,85 @@
 import type { RegistroCombustible, DraftRegistro } from './types';
 import { VEHICULOS } from './constants';
+import { saveRegistroDB, getAllRegistrosDB, getRegistroByIdDB } from './idb';
 
 const DRAFT_KEY = 'fleetfuel_draft';
 const PENDING_SYNC_KEY = 'fleetfuel_pending_sync';
 
-function registrosKey(userId: string): string {
-  return `fleetfuel_registros_${userId}`;
-}
-
-export function getRegistros(userId: string): RegistroCombustible[] {
+export async function getRegistros(userId: string): Promise<RegistroCombustible[]> {
   if (typeof window === 'undefined') return [];
-
-  const raw = localStorage.getItem(registrosKey(userId));
-  if (!raw) return [];
-
   try {
-    return JSON.parse(raw) as RegistroCombustible[];
+    return await getAllRegistrosDB(userId);
   } catch {
     return [];
   }
 }
 
-export function saveRegistro(
+export async function saveRegistro(
   userId: string,
   registro: RegistroCombustible
-): void {
+): Promise<void> {
   if (typeof window === 'undefined') return;
-
-  const registros = getRegistros(userId);
-  registros.unshift(registro);
-  localStorage.setItem(registrosKey(userId), JSON.stringify(registros));
+  await saveRegistroDB(registro);
 }
 
-export function getRegistroById(
+export async function getRegistroById(
   userId: string,
   id: string
-): RegistroCombustible | undefined {
-  return getRegistros(userId).find((r) => r.id === id);
+): Promise<RegistroCombustible | undefined> {
+  if (typeof window === 'undefined') return undefined;
+  try {
+    return await getRegistroByIdDB(id);
+  } catch {
+    return undefined;
+  }
 }
 
-export function getRegistrosDelMes(
+export async function getRegistrosDelMes(
   userId: string
-): RegistroCombustible[] {
+): Promise<RegistroCombustible[]> {
   const now = new Date();
   const mes = now.getMonth();
   const anio = now.getFullYear();
+  const registros = await getRegistros(userId);
 
-  return getRegistros(userId).filter((r) => {
+  return registros.filter((r) => {
     const fecha = new Date(r.fechaCreacion);
     return fecha.getMonth() === mes && fecha.getFullYear() === anio;
   });
 }
 
-export function getRegistrosPorMes(
+export async function getRegistrosPorMes(
   userId: string,
   mes: number,
   anio: number
-): RegistroCombustible[] {
-  return getRegistros(userId).filter((r) => {
+): Promise<RegistroCombustible[]> {
+  const registros = await getRegistros(userId);
+  return registros.filter((r) => {
     const fecha = new Date(r.fechaCreacion);
     return fecha.getMonth() === mes && fecha.getFullYear() === anio;
   });
 }
 
-export function getUltimosRegistros(
+export async function getUltimosRegistros(
   userId: string,
   count: number = 5
-): RegistroCombustible[] {
-  return getRegistros(userId).slice(0, count);
+): Promise<RegistroCombustible[]> {
+  const registros = await getRegistros(userId);
+  return registros.slice(0, count);
 }
 
-export function getTotalLitros(userId: string): number {
-  return getRegistrosDelMes(userId).reduce(
-    (sum, r) => sum + (r.litros || 0),
-    0
-  );
+export async function getTotalLitros(userId: string): Promise<number> {
+  const registros = await getRegistrosDelMes(userId);
+  return registros.reduce((sum, r) => sum + (r.litros || 0), 0);
 }
 
-export function getTotalImporte(userId: string): number {
-  return getRegistrosDelMes(userId).reduce(
-    (sum, r) => sum + (r.importeTotal || 0),
-    0
-  );
+export async function getTotalImporte(userId: string): Promise<number> {
+  const registros = await getRegistrosDelMes(userId);
+  return registros.reduce((sum, r) => sum + (r.importeTotal || 0), 0);
 }
 
-export function getUltimoVehiculo(
-  userId: string
-): string {
-  const registros = getRegistros(userId);
+export async function getUltimoVehiculo(userId: string): Promise<string> {
+  const registros = await getRegistros(userId);
   if (registros.length === 0) return 'Ninguno';
   return registros[0].vehiculoNombre || 'Desconocido';
 }
@@ -99,10 +91,8 @@ export function saveDraft(draft: Partial<DraftRegistro>): void {
 
 export function getDraft(): Partial<DraftRegistro> | null {
   if (typeof window === 'undefined') return null;
-
   const raw = localStorage.getItem(DRAFT_KEY);
   if (!raw) return null;
-
   try {
     return JSON.parse(raw) as Partial<DraftRegistro>;
   } catch {
@@ -115,23 +105,8 @@ export function clearDraft(): void {
   localStorage.removeItem(DRAFT_KEY);
 }
 
-export function getPendingSyncCount(): number {
-  if (typeof window === 'undefined') return 0;
-
-  const raw = localStorage.getItem(PENDING_SYNC_KEY);
-  if (!raw) return 0;
-
-  try {
-    const ids = JSON.parse(raw) as string[];
-    return ids.length;
-  } catch {
-    return 0;
-  }
-}
-
 export function markPendingSync(id: string): void {
   if (typeof window === 'undefined') return;
-
   const raw = localStorage.getItem(PENDING_SYNC_KEY);
   let ids: string[] = [];
   if (raw) {
@@ -149,10 +124,8 @@ export function markPendingSync(id: string): void {
 
 export function clearPendingSync(id: string): void {
   if (typeof window === 'undefined') return;
-
   const raw = localStorage.getItem(PENDING_SYNC_KEY);
   if (!raw) return;
-
   try {
     const ids = JSON.parse(raw) as string[];
     const filtered = ids.filter((i) => i !== id);
@@ -162,17 +135,15 @@ export function clearPendingSync(id: string): void {
   }
 }
 
-export function getMesesDisponibles(
+export async function getMesesDisponibles(
   userId: string
-): { mes: number; anio: number }[] {
-  const registros = getRegistros(userId);
+): Promise<{ mes: number; anio: number }[]> {
+  const registros = await getRegistros(userId);
   const meses = new Set<string>();
-
   registros.forEach((r) => {
     const fecha = new Date(r.fechaCreacion);
     meses.add(`${fecha.getMonth()}-${fecha.getFullYear()}`);
   });
-
   return Array.from(meses)
     .map((m) => {
       const [mes, anio] = m.split('-').map(Number);

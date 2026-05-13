@@ -19,15 +19,17 @@ export default function ReportesList() {
     const session = getSession();
     if (!session) return;
 
-    const all = getRegistros(session.username);
-    setRegistros(all);
+    (async () => {
+      const all = await getRegistros(session.username);
+      setRegistros(all);
 
-    const m = getMesesDisponibles(session.username);
-    setMeses(m);
-    if (m.length > 0) {
-      const current = `${new Date().getMonth()}-${new Date().getFullYear()}`;
-      setMesFiltro(current);
-    }
+      const m = await getMesesDisponibles(session.username);
+      setMeses(m);
+      if (m.length > 0) {
+        const current = `${new Date().getMonth()}-${new Date().getFullYear()}`;
+        setMesFiltro(current);
+      }
+    })();
   }, []);
 
   const registrosFiltrados = registros.filter((r) => {
@@ -38,13 +40,13 @@ export default function ReportesList() {
   });
 
   return (
-    <div class="px-4 py-4 max-w-lg mx-auto">
-      <div class="flex items-center justify-between mb-4">
-        <h2 class="text-lg font-bold font-display text-text">Mis Reportes</h2>
+    <div className="px-4 py-4 max-w-lg mx-auto">
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-lg font-bold font-display text-text">Mis Reportes</h2>
         <select
           value={mesFiltro}
           onChange={(e) => setMesFiltro(e.target.value)}
-          class="h-10 px-3 bg-surface-2 border border-border rounded-xl text-sm text-text focus:outline-none focus:border-accent transition-colors appearance-none"
+          className="h-10 px-3 bg-surface-2 border border-border rounded-xl text-sm text-text focus:outline-none focus:border-accent transition-colors appearance-none"
         >
           <option value="all">Todos</option>
           {meses.map((m) => {
@@ -59,24 +61,24 @@ export default function ReportesList() {
       </div>
 
       {registrosFiltrados.length === 0 ? (
-        <div class="text-center py-16">
-          <svg class="w-24 h-24 text-surface-2 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width={0.5} d="M13 10V3L4 14h7v7l9-11h-7z" />
+        <div className="text-center py-16">
+          <svg className="w-24 h-24 text-surface-2 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={0.5} d="M13 10V3L4 14h7v7l9-11h-7z" />
           </svg>
-          <p class="text-text-muted font-medium">Aún no tienes registros</p>
-          <p class="text-sm text-text-muted mt-1">¡Carga tu primer combustible!</p>
+          <p className="text-text-muted font-medium">Aún no tienes registros</p>
+          <p className="text-sm text-text-muted mt-1">¡Carga tu primer combustible!</p>
           <a
             href="/nuevo-registro"
-            class="inline-flex items-center gap-2 mt-4 px-6 h-11 bg-accent hover:bg-accent/90 text-white font-bold rounded-xl transition-colors touch-target"
+            className="inline-flex items-center gap-2 mt-4 px-6 h-11 bg-accent hover:bg-accent/90 text-white font-bold rounded-xl transition-colors touch-target"
           >
-            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width={2.5}>
-              <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
             </svg>
             Nuevo Registro
           </a>
         </div>
       ) : (
-        <div class="space-y-3">
+        <div className="space-y-3">
           {registrosFiltrados.map((r) => (
             <ReportCard key={r.id} registro={r} />
           ))}
@@ -85,10 +87,10 @@ export default function ReportesList() {
 
       <a
         href="/nuevo-registro"
-        class="fixed bottom-20 right-4 z-30 w-14 h-14 bg-accent hover:bg-accent/90 text-white rounded-full shadow-lg shadow-accent/30 flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95 touch-target"
+        className="fixed bottom-20 right-4 z-30 w-14 h-14 bg-accent hover:bg-accent/90 text-white rounded-full shadow-lg shadow-accent/30 flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95 touch-target"
       >
-        <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width={2.5}>
-          <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+        <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
         </svg>
       </a>
     </div>

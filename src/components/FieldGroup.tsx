@@ -10,14 +10,14 @@ interface FieldGroupProps {
 
 export default function FieldGroup({ label, required, error, children, className = '' }: FieldGroupProps) {
   return (
-    <div class={`flex flex-col gap-1.5 ${className}`}>
-      <label class="text-sm font-medium text-text-muted">
+    <div className={`flex flex-col gap-1.5 ${className}`}>
+      <label className="text-sm font-medium text-text-muted">
         {label}
-        {required && <span class="text-danger ml-0.5">*</span>}
+        {required && <span className="text-danger ml-0.5">*</span>}
       </label>
       {children}
       {error && (
-        <p class="text-xs text-danger mt-0.5 animate-fade-in">{error}</p>
+        <p className="text-xs text-danger mt-0.5 animate-fade-in">{error}</p>
       )}
     </div>
   );

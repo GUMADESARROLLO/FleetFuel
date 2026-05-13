@@ -42,6 +42,11 @@ export default function NuevoRegistroWizard() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [toast, setToast] = useState({ visible: false, message: '', type: 'success' as 'success' | 'error' | 'info' });
   const [saved, setSaved] = useState(false);
+  const [hydrated, setHydrated] = useState(false);
+
+  useEffect(() => {
+    setHydrated(true);
+  }, []);
 
   useEffect(() => {
     requireAuth();
@@ -105,7 +110,7 @@ export default function NuevoRegistroWizard() {
     return Math.abs(suma - total) < 0.01;
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!validateStep(3)) {
       setStep(3);
       return;
@@ -146,7 +151,7 @@ export default function NuevoRegistroWizard() {
       sincronizado: navigator.onLine,
     };
 
-    saveRegistro(session.username, registro);
+    await saveRegistro(session.username, registro);
 
     if (!navigator.onLine) {
       markPendingSync(registro.id);
@@ -169,14 +174,14 @@ export default function NuevoRegistroWizard() {
   const isStep1Valid = form.fotoOdometroAntes && form.fotoOdometroDespues;
 
   return (
-    <div class="px-4 py-4 max-w-lg mx-auto">
+    <div className="px-4 py-4 max-w-lg mx-auto">
       <StepProgress currentStep={step} totalSteps={4} labels={STEP_LABELS} />
 
       {step === 1 && (
-        <div class="animate-fade-in">
-          <h2 class="text-lg font-bold font-display text-text mb-4">Evidencia Fotográfica</h2>
-          <p class="text-sm text-text-muted mb-6">Toma o selecciona fotos de cada evidencia requerida</p>
-          <div class="grid grid-cols-2 gap-4 mb-6">
+        <div className="animate-fade-in">
+          <h2 className="text-lg font-bold font-display text-text mb-4">Evidencia Fotográfica</h2>
+          <p className="text-sm text-text-muted mb-6">Toma o selecciona fotos de cada evidencia requerida</p>
+          <div className="grid grid-cols-2 gap-4 mb-6">
             <PhotoUpload
               label="Odómetro ANTES"
               value={form.fotoOdometroAntes}
@@ -205,12 +210,12 @@ export default function NuevoRegistroWizard() {
             />
           </div>
           {errors.fotoOdometroAntes && (
-            <p class="text-sm text-danger mb-4 animate-fade-in">Los odómetros antes y después son obligatorios</p>
+            <p className="text-sm text-danger mb-4 animate-fade-in">Los odómetros antes y después son obligatorios</p>
           )}
           <button
             onClick={nextStep}
-            disabled={!isStep1Valid}
-            class="w-full h-12 bg-accent hover:bg-accent/90 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold rounded-xl transition-all touch-target"
+            disabled={hydrated && !isStep1Valid}
+            className="w-full h-12 bg-accent hover:bg-accent/90 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold rounded-xl transition-all touch-target"
           >
             Siguiente
           </button>
@@ -218,14 +223,14 @@ export default function NuevoRegistroWizard() {
       )}
 
       {step === 2 && (
-        <div class="animate-fade-in">
-          <h2 class="text-lg font-bold font-display text-text mb-4">Datos del Vehículo</h2>
-          <div class="space-y-4">
+        <div className="animate-fade-in">
+          <h2 className="text-lg font-bold font-display text-text mb-4">Datos del Vehículo</h2>
+          <div className="space-y-4">
             <FieldGroup label="Vehículo" required error={errors.vehiculoId}>
               <select
                 value={form.vehiculoId}
                 onChange={(e) => updateField('vehiculoId', e.target.value)}
-                class="w-full h-12 px-4 bg-surface-2 border border-border rounded-xl text-text focus:outline-none focus:border-accent transition-colors appearance-none"
+                className="w-full h-12 px-4 bg-surface-2 border border-border rounded-xl text-text focus:outline-none focus:border-accent transition-colors appearance-none"
               >
                 <option value="">Seleccione Vehículo</option>
                 {VEHICULOS.map((v) => (
@@ -238,7 +243,7 @@ export default function NuevoRegistroWizard() {
               <select
                 value={form.tipoCombustible}
                 onChange={(e) => updateField('tipoCombustible', e.target.value)}
-                class="w-full h-12 px-4 bg-surface-2 border border-border rounded-xl text-text focus:outline-none focus:border-accent transition-colors appearance-none"
+                className="w-full h-12 px-4 bg-surface-2 border border-border rounded-xl text-text focus:outline-none focus:border-accent transition-colors appearance-none"
               >
                 <option value="">Seleccione Tipo</option>
                 {TIPOS_COMBUSTIBLE.map((t) => (
@@ -251,7 +256,7 @@ export default function NuevoRegistroWizard() {
               <select
                 value={form.proveedor}
                 onChange={(e) => updateField('proveedor', e.target.value)}
-                class="w-full h-12 px-4 bg-surface-2 border border-border rounded-xl text-text focus:outline-none focus:border-accent transition-colors appearance-none"
+                className="w-full h-12 px-4 bg-surface-2 border border-border rounded-xl text-text focus:outline-none focus:border-accent transition-colors appearance-none"
               >
                 <option value="">Seleccione Proveedor</option>
                 {PROVEEDORES.map((p) => (
@@ -264,7 +269,7 @@ export default function NuevoRegistroWizard() {
               <select
                 value={form.subProyecto}
                 onChange={(e) => updateField('subProyecto', e.target.value)}
-                class="w-full h-12 px-4 bg-surface-2 border border-border rounded-xl text-text focus:outline-none focus:border-accent transition-colors appearance-none"
+                className="w-full h-12 px-4 bg-surface-2 border border-border rounded-xl text-text focus:outline-none focus:border-accent transition-colors appearance-none"
               >
                 <option value="">Seleccione Sub Proyecto</option>
                 {SUB_PROYECTOS.map((s) => (
@@ -279,7 +284,7 @@ export default function NuevoRegistroWizard() {
                 value={form.kilometraje}
                 onChange={(e) => updateField('kilometraje', e.target.value)}
                 placeholder="Ej: 45230 km"
-                class="w-full h-12 px-4 bg-surface-2 border border-border rounded-xl text-text placeholder:text-text-muted/50 focus:outline-none focus:border-accent transition-colors"
+                className="w-full h-12 px-4 bg-surface-2 border border-border rounded-xl text-text placeholder:text-text-muted/50 focus:outline-none focus:border-accent transition-colors"
               />
             </FieldGroup>
 
@@ -288,22 +293,22 @@ export default function NuevoRegistroWizard() {
                 type="date"
                 value={form.fechaFactura}
                 onChange={(e) => updateField('fechaFactura', e.target.value)}
-                class="w-full h-12 px-4 bg-surface-2 border border-border rounded-xl text-text focus:outline-none focus:border-accent transition-colors"
+                className="w-full h-12 px-4 bg-surface-2 border border-border rounded-xl text-text focus:outline-none focus:border-accent transition-colors"
               />
             </FieldGroup>
           </div>
 
-          <div class="flex gap-3 mt-6">
+          <div className="flex gap-3 mt-6">
             <button
               onClick={prevStep}
-              class="flex-1 h-12 bg-surface-2 hover:bg-surface-2/80 text-text font-medium rounded-xl transition-colors touch-target"
+              className="flex-1 h-12 bg-surface-2 hover:bg-surface-2/80 text-text font-medium rounded-xl transition-colors touch-target"
             >
               Atrás
             </button>
             <button
               onClick={nextStep}
-              disabled={!isStep2Valid}
-              class="flex-1 h-12 bg-accent hover:bg-accent/90 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold rounded-xl transition-all touch-target"
+              disabled={hydrated && !isStep2Valid}
+              className="flex-1 h-12 bg-accent hover:bg-accent/90 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold rounded-xl transition-all touch-target"
             >
               Siguiente
             </button>
@@ -312,17 +317,17 @@ export default function NuevoRegistroWizard() {
       )}
 
       {step === 3 && (
-        <div class="animate-fade-in">
-          <h2 class="text-lg font-bold font-display text-text mb-4">Datos de Factura</h2>
+        <div className="animate-fade-in">
+          <h2 className="text-lg font-bold font-display text-text mb-4">Datos de Factura</h2>
 
-          <div class="bg-surface rounded-xl border-l-4 border-accent p-4 mb-4 space-y-4">
+          <div className="bg-surface rounded-xl border-l-4 border-accent p-4 mb-4 space-y-4">
             <FieldGroup label="Número de Factura" required error={errors.numeroFactura}>
               <input
                 type="text"
                 value={form.numeroFactura}
                 onChange={(e) => updateField('numeroFactura', e.target.value)}
                 placeholder="Ej: F001-00123"
-                class="w-full h-12 px-4 bg-surface-2 border border-border rounded-xl text-text placeholder:text-text-muted/50 focus:outline-none focus:border-accent transition-colors"
+                className="w-full h-12 px-4 bg-surface-2 border border-border rounded-xl text-text placeholder:text-text-muted/50 focus:outline-none focus:border-accent transition-colors"
               />
             </FieldGroup>
 
@@ -332,13 +337,13 @@ export default function NuevoRegistroWizard() {
                 value={form.numeroVoucher}
                 onChange={(e) => updateField('numeroVoucher', e.target.value)}
                 placeholder="Ej: VCH-2024-0089"
-                class="w-full h-12 px-4 bg-surface-2 border border-border rounded-xl text-text placeholder:text-text-muted/50 focus:outline-none focus:border-accent transition-colors"
+                className="w-full h-12 px-4 bg-surface-2 border border-border rounded-xl text-text placeholder:text-text-muted/50 focus:outline-none focus:border-accent transition-colors"
               />
             </FieldGroup>
           </div>
 
-          <div class="bg-surface rounded-xl border-l-4 border-accent p-4 mb-4 space-y-4">
-            <h3 class="text-sm font-bold text-text mb-2">Montos</h3>
+          <div className="bg-surface rounded-xl border-l-4 border-accent p-4 mb-4 space-y-4">
+            <h3 className="text-sm font-bold text-text mb-2">Montos</h3>
             <FieldGroup label="Gravadas">
               <input
                 type="number"
@@ -347,7 +352,7 @@ export default function NuevoRegistroWizard() {
                 value={form.gravadas}
                 onChange={(e) => updateField('gravadas', e.target.value)}
                 placeholder="0.00"
-                class="w-full h-12 px-4 bg-surface-2 border border-border rounded-xl text-text placeholder:text-text-muted/50 focus:outline-none focus:border-accent transition-colors"
+                className="w-full h-12 px-4 bg-surface-2 border border-border rounded-xl text-text placeholder:text-text-muted/50 focus:outline-none focus:border-accent transition-colors"
               />
             </FieldGroup>
 
@@ -359,7 +364,7 @@ export default function NuevoRegistroWizard() {
                 value={form.isr}
                 onChange={(e) => updateField('isr', e.target.value)}
                 placeholder="0.00"
-                class="w-full h-12 px-4 bg-surface-2 border border-border rounded-xl text-text placeholder:text-text-muted/50 focus:outline-none focus:border-accent transition-colors"
+                className="w-full h-12 px-4 bg-surface-2 border border-border rounded-xl text-text placeholder:text-text-muted/50 focus:outline-none focus:border-accent transition-colors"
               />
             </FieldGroup>
 
@@ -371,7 +376,7 @@ export default function NuevoRegistroWizard() {
                 value={form.excedentes}
                 onChange={(e) => updateField('excedentes', e.target.value)}
                 placeholder="0.00"
-                class="w-full h-12 px-4 bg-surface-2 border border-border rounded-xl text-text placeholder:text-text-muted/50 focus:outline-none focus:border-accent transition-colors"
+                className="w-full h-12 px-4 bg-surface-2 border border-border rounded-xl text-text placeholder:text-text-muted/50 focus:outline-none focus:border-accent transition-colors"
               />
             </FieldGroup>
 
@@ -383,7 +388,7 @@ export default function NuevoRegistroWizard() {
                 value={form.litros}
                 onChange={(e) => updateField('litros', e.target.value)}
                 placeholder="0.00"
-                class="w-full h-12 px-4 bg-surface-2 border border-border rounded-xl text-text placeholder:text-text-muted/50 focus:outline-none focus:border-accent transition-colors"
+                className="w-full h-12 px-4 bg-surface-2 border border-border rounded-xl text-text placeholder:text-text-muted/50 focus:outline-none focus:border-accent transition-colors"
               />
             </FieldGroup>
 
@@ -395,30 +400,30 @@ export default function NuevoRegistroWizard() {
                 value={form.importeTotal}
                 onChange={(e) => updateField('importeTotal', e.target.value)}
                 placeholder="0.00"
-                class="w-full h-12 px-4 bg-surface-2 border border-border rounded-xl text-text placeholder:text-text-muted/50 focus:outline-none focus:border-accent transition-colors"
+                className="w-full h-12 px-4 bg-surface-2 border border-border rounded-xl text-text placeholder:text-text-muted/50 focus:outline-none focus:border-accent transition-colors"
               />
             </FieldGroup>
 
             {montosCuadran() && (
-              <div class="flex items-center gap-2 p-3 bg-success/10 border border-success/30 rounded-xl">
-                <svg class="w-5 h-5 text-success" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width={2.5}>
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+              <div className="flex items-center gap-2 p-3 bg-success/10 border border-success/30 rounded-xl">
+                <svg className="w-5 h-5 text-success" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                 </svg>
-                <span class="text-sm font-medium text-success">Montos cuadrados</span>
+                <span className="text-sm font-medium text-success">Montos cuadrados</span>
               </div>
             )}
           </div>
 
-          <div class="flex gap-3 mt-6">
+          <div className="flex gap-3 mt-6">
             <button
               onClick={prevStep}
-              class="flex-1 h-12 bg-surface-2 hover:bg-surface-2/80 text-text font-medium rounded-xl transition-colors touch-target"
+              className="flex-1 h-12 bg-surface-2 hover:bg-surface-2/80 text-text font-medium rounded-xl transition-colors touch-target"
             >
               Atrás
             </button>
             <button
               onClick={nextStep}
-              class="flex-1 h-12 bg-accent hover:bg-accent/90 text-white font-bold rounded-xl transition-all touch-target"
+              className="flex-1 h-12 bg-accent hover:bg-accent/90 text-white font-bold rounded-xl transition-all touch-target"
             >
               Siguiente
             </button>
@@ -427,8 +432,8 @@ export default function NuevoRegistroWizard() {
       )}
 
       {step === 4 && (
-        <div class="animate-fade-in">
-          <h2 class="text-lg font-bold font-display text-text mb-4">Ruta y Confirmación</h2>
+        <div className="animate-fade-in">
+          <h2 className="text-lg font-bold font-display text-text mb-4">Ruta y Confirmación</h2>
 
           <FieldGroup label="Ruta recorrida">
             <textarea
@@ -437,66 +442,66 @@ export default function NuevoRegistroWizard() {
               placeholder="Origen → Destino, paradas intermedias..."
               rows={4}
               maxLength={500}
-              class="w-full px-4 py-3 bg-surface-2 border border-border rounded-xl text-text placeholder:text-text-muted/50 focus:outline-none focus:border-accent transition-colors resize-none"
+              className="w-full px-4 py-3 bg-surface-2 border border-border rounded-xl text-text placeholder:text-text-muted/50 focus:outline-none focus:border-accent transition-colors resize-none"
             />
-            <p class="text-xs text-text-muted text-right mt-1">{form.rutaRecorrida.length}/500</p>
+            <p className="text-xs text-text-muted text-right mt-1">{form.rutaRecorrida.length}/500</p>
           </FieldGroup>
 
-          <details class="mt-6 bg-surface rounded-xl border border-border overflow-hidden">
-            <summary class="px-4 py-3 text-sm font-bold text-text cursor-pointer hover:bg-surface-2 transition-colors touch-target">
+          <details className="mt-6 bg-surface rounded-xl border border-border overflow-hidden">
+            <summary className="px-4 py-3 text-sm font-bold text-text cursor-pointer hover:bg-surface-2 transition-colors touch-target">
               Ver resumen del registro
             </summary>
-            <div class="px-4 pb-4 space-y-3 text-sm">
-              <div class="grid grid-cols-2 gap-2">
+            <div className="px-4 pb-4 space-y-3 text-sm">
+              <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <p class="text-[10px] text-text-muted uppercase">Vehículo</p>
-                  <p class="text-text font-medium">{VEHICULOS.find(v => v.id === form.vehiculoId)?.nombre || '-'}</p>
+                  <p className="text-[10px] text-text-muted uppercase">Vehículo</p>
+                  <p className="text-text font-medium">{VEHICULOS.find(v => v.id === form.vehiculoId)?.nombre || '-'}</p>
                 </div>
                 <div>
-                  <p class="text-[10px] text-text-muted uppercase">Combustible</p>
-                  <p class="text-text font-medium">{form.tipoCombustible}</p>
+                  <p className="text-[10px] text-text-muted uppercase">Combustible</p>
+                  <p className="text-text font-medium">{form.tipoCombustible}</p>
                 </div>
                 <div>
-                  <p class="text-[10px] text-text-muted uppercase">Proveedor</p>
-                  <p class="text-text font-medium">{form.proveedor}</p>
+                  <p className="text-[10px] text-text-muted uppercase">Proveedor</p>
+                  <p className="text-text font-medium">{form.proveedor}</p>
                 </div>
                 <div>
-                  <p class="text-[10px] text-text-muted uppercase">Kilometraje</p>
-                  <p class="text-text font-medium">{form.kilometraje} km</p>
+                  <p className="text-[10px] text-text-muted uppercase">Kilometraje</p>
+                  <p className="text-text font-medium">{form.kilometraje} km</p>
                 </div>
                 <div>
-                  <p class="text-[10px] text-text-muted uppercase">Litros</p>
-                  <p class="text-text font-medium">{form.litros} L</p>
+                  <p className="text-[10px] text-text-muted uppercase">Litros</p>
+                  <p className="text-text font-medium">{form.litros} L</p>
                 </div>
                 <div>
-                  <p class="text-[10px] text-text-muted uppercase">Importe</p>
-                  <p class="text-accent font-bold">${parseFloat(form.importeTotal || '0').toFixed(2)}</p>
+                  <p className="text-[10px] text-text-muted uppercase">Importe</p>
+                  <p className="text-accent font-bold">${parseFloat(form.importeTotal || '0').toFixed(2)}</p>
                 </div>
               </div>
               <div>
-                <p class="text-[10px] text-text-muted uppercase">Factura</p>
-                <p class="text-text font-medium">{form.numeroFactura}</p>
+                <p className="text-[10px] text-text-muted uppercase">Factura</p>
+                <p className="text-text font-medium">{form.numeroFactura}</p>
               </div>
               <div>
-                <p class="text-[10px] text-text-muted uppercase">Voucher</p>
-                <p class="text-text font-medium">{form.numeroVoucher}</p>
+                <p className="text-[10px] text-text-muted uppercase">Voucher</p>
+                <p className="text-text font-medium">{form.numeroVoucher}</p>
               </div>
             </div>
           </details>
 
-          <div class="flex flex-col gap-3 mt-6">
+          <div className="flex flex-col gap-3 mt-6">
             <button
               onClick={handleSave}
-              class="w-full h-12 bg-accent hover:bg-accent/90 text-white font-bold rounded-xl transition-colors touch-target flex items-center justify-center gap-2"
+              className="w-full h-12 bg-accent hover:bg-accent/90 text-white font-bold rounded-xl transition-colors touch-target flex items-center justify-center gap-2"
             >
-              <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width={2.5}>
-                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
               </svg>
               Guardar Registro
             </button>
             <button
               onClick={() => (window.location.href = '/dashboard')}
-              class="w-full h-12 border border-border hover:bg-surface text-text-muted font-medium rounded-xl transition-colors touch-target"
+              className="w-full h-12 border border-border hover:bg-surface text-text-muted font-medium rounded-xl transition-colors touch-target"
             >
               Cancelar
             </button>

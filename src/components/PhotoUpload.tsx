@@ -12,7 +12,31 @@ export default function PhotoUpload({ label, value, onChange, shape = 'circle', 
   const inputRef = useRef<HTMLInputElement>(null);
   const [error, setError] = useState('');
 
-  const handleFile = (file: File) => {
+  const compressImage = (src: string): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => {
+        const MAX = 1024;
+        let w = img.width;
+        let h = img.height;
+        if (w > MAX || h > MAX) {
+          const ratio = Math.min(MAX / w, MAX / h);
+          w = Math.round(w * ratio);
+          h = Math.round(h * ratio);
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = w;
+        canvas.height = h;
+        const ctx = canvas.getContext('2d')!;
+        ctx.drawImage(img, 0, 0, w, h);
+        resolve(canvas.toDataURL('image/jpeg', 0.7));
+      };
+      img.onerror = () => reject(new Error('Error al cargar imagen'));
+      img.src = src;
+    });
+  };
+
+  const handleFile = async (file: File) => {
     setError('');
     if (!file.type.startsWith('image/')) {
       setError('Solo imágenes');
@@ -23,8 +47,13 @@ export default function PhotoUpload({ label, value, onChange, shape = 'circle', 
       return;
     }
     const reader = new FileReader();
-    reader.onloadend = () => {
-      onChange(reader.result as string);
+    reader.onloadend = async () => {
+      try {
+        const compressed = await compressImage(reader.result as string);
+        onChange(compressed);
+      } catch {
+        setError('Error al procesar imagen');
+      }
     };
     reader.readAsDataURL(file);
   };
@@ -36,17 +65,17 @@ export default function PhotoUpload({ label, value, onChange, shape = 'circle', 
   };
 
   return (
-    <div class="flex flex-col items-center gap-2">
-      <p class="text-sm font-medium text-text-muted text-center">
+    <div className="flex flex-col items-center gap-2">
+      <p className="text-sm font-medium text-text-muted text-center">
         {label}
-        {required && <span class="text-danger ml-0.5">*</span>}
+        {required && <span className="text-danger ml-0.5">*</span>}
       </p>
       <button
         type="button"
         onClick={() => inputRef.current?.click()}
         onDragOver={(e) => e.preventDefault()}
         onDrop={handleDrop}
-        class={`relative w-24 h-24 ${
+        className={`relative w-24 h-24 ${
           shape === 'circle' ? 'rounded-full' : 'rounded-xl'
         } border-2 border-dashed transition-all duration-200 overflow-hidden ${
           value ? 'border-accent bg-accent/5' : 'border-border hover:border-accent/50 bg-surface'
@@ -54,26 +83,26 @@ export default function PhotoUpload({ label, value, onChange, shape = 'circle', 
       >
         {value ? (
           <>
-            <img src={value} alt={label} class="w-full h-full object-cover" />
-            <div class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
-              <svg class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+            <img src={value} alt={label} className="w-full h-full object-cover" />
+            <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
+              <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
               </svg>
             </div>
-            <div class="absolute top-1 right-1 w-5 h-5 bg-success rounded-full flex items-center justify-center">
-              <svg class="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width={3}>
-                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+            <div className="absolute top-1 right-1 w-5 h-5 bg-success rounded-full flex items-center justify-center">
+              <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
               </svg>
             </div>
           </>
         ) : (
-          <div class="flex flex-col items-center justify-center h-full gap-1">
-            <svg class="w-7 h-7 text-text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width={1.5} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width={1.5} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+          <div className="flex flex-col items-center justify-center h-full gap-1">
+            <svg className="w-7 h-7 text-text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
             </svg>
-            <span class="text-[10px] text-text-muted text-center px-1 leading-tight">Toca para foto</span>
+            <span className="text-[10px] text-text-muted text-center px-1 leading-tight">Toca para foto</span>
           </div>
         )}
       </button>
@@ -82,18 +111,18 @@ export default function PhotoUpload({ label, value, onChange, shape = 'circle', 
         type="file"
         accept="image/*"
         capture="environment"
-        class="hidden"
+        className="hidden"
         onChange={(e) => {
           const file = e.target.files?.[0];
           if (file) handleFile(file);
         }}
       />
-      {error && <p class="text-xs text-danger animate-fade-in">{error}</p>}
+      {error && <p className="text-xs text-danger animate-fade-in">{error}</p>}
       {value && (
         <button
           type="button"
           onClick={() => onChange('')}
-          class="text-xs text-danger/80 hover:text-danger transition-colors"
+          className="text-xs text-danger/80 hover:text-danger transition-colors"
         >
           Eliminar foto
         </button>

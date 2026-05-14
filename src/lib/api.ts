@@ -1,4 +1,4 @@
-import type { RegistroCombustible, Usuario } from './types';
+import type { RegistroCombustible, Usuario, Vehiculo } from './types';
 
 const BASE = '/api';
 
@@ -84,6 +84,34 @@ export async function apiDeleteUsuario(username: string): Promise<void> {
     const err = await res.json().catch(() => ({}));
     throw new Error(err.error || 'Error deleting usuario');
   }
+}
+
+export async function apiGetVehiculos(): Promise<Vehiculo[]> {
+  const res = await fetch(`${BASE}/vehiculos`);
+  if (!res.ok) throw new Error('Error fetching vehiculos');
+  const json = await res.json();
+  return json.data || [];
+}
+
+export async function apiGetTiposCombustible(): Promise<string[]> {
+  const res = await fetch(`${BASE}/tipos-combustible`);
+  if (!res.ok) throw new Error('Error fetching tipos combustible');
+  const json = await res.json();
+  return json.data || [];
+}
+
+export async function apiGetProveedores(): Promise<string[]> {
+  const res = await fetch(`${BASE}/proveedores`);
+  if (!res.ok) throw new Error('Error fetching proveedores');
+  const json = await res.json();
+  return json.data || [];
+}
+
+export async function apiGetSubProyectos(): Promise<string[]> {
+  const res = await fetch(`${BASE}/sub-proyectos`);
+  if (!res.ok) throw new Error('Error fetching sub proyectos');
+  const json = await res.json();
+  return json.data || [];
 }
 
 export async function apiUploadImage(

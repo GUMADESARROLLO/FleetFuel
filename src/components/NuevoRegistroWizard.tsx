@@ -1,11 +1,7 @@
 import { useEffect, useState } from 'react';
 import { getSession, requireAuth } from '../lib/auth';
-import {
-  VEHICULOS,
-  TIPOS_COMBUSTIBLE,
-  PROVEEDORES,
-  SUB_PROYECTOS,
-} from '../lib/constants';
+import { loadCatalogs } from '../lib/constants';
+import type { Catalogs } from '../lib/constants';
 import { saveRegistro, saveDraft, getDraft, clearDraft, generateId, markPendingSync, formatCurrency } from '../lib/storage';
 import { apiUploadImage } from '../lib/api';
 import type { DraftRegistro, RegistroCombustible } from '../lib/types';
@@ -45,6 +41,7 @@ export default function NuevoRegistroWizard() {
   const [saved, setSaved] = useState(false);
   const [saving, setSaving] = useState(false);
   const [hydrated, setHydrated] = useState(false);
+  const [catalogs, setCatalogs] = useState<Catalogs | null>(null);
 
   useEffect(() => {
     setHydrated(true);
@@ -52,6 +49,7 @@ export default function NuevoRegistroWizard() {
 
   useEffect(() => {
     requireAuth();
+    loadCatalogs().then(setCatalogs).catch(() => {});
     const draft = getDraft();
     if (draft) setForm({ ...emptyDraft, ...draft });
   }, []);
@@ -127,7 +125,7 @@ export default function NuevoRegistroWizard() {
     setSaving(true);
 
     try {
-      const vehiculo = VEHICULOS.find((v) => v.id === form.vehiculoId);
+      const vehiculo = catalogs?.vehiculos.find((v) => v.id === form.vehiculoId);
 
       const id = generateId();
 
@@ -296,7 +294,7 @@ export default function NuevoRegistroWizard() {
                 className="w-full h-12 px-4 bg-surface-2 border border-border rounded-xl text-text focus:outline-none focus:border-accent transition-colors appearance-none"
               >
                 <option value="">Seleccione Vehículo</option>
-                {VEHICULOS.map((v) => (
+                {catalogs?.vehiculos.map((v) => (
                   <option key={v.id} value={v.id}>{v.nombre} ({v.placa})</option>
                 ))}
               </select>
@@ -309,7 +307,7 @@ export default function NuevoRegistroWizard() {
                 className="w-full h-12 px-4 bg-surface-2 border border-border rounded-xl text-text focus:outline-none focus:border-accent transition-colors appearance-none"
               >
                 <option value="">Seleccione Tipo</option>
-                {TIPOS_COMBUSTIBLE.map((t) => (
+                {catalogs?.tiposCombustible.map((t) => (
                   <option key={t} value={t}>{t}</option>
                 ))}
               </select>
@@ -322,7 +320,7 @@ export default function NuevoRegistroWizard() {
                 className="w-full h-12 px-4 bg-surface-2 border border-border rounded-xl text-text focus:outline-none focus:border-accent transition-colors appearance-none"
               >
                 <option value="">Seleccione Proveedor</option>
-                {PROVEEDORES.map((p) => (
+                {catalogs?.proveedores.map((p) => (
                   <option key={p} value={p}>{p}</option>
                 ))}
               </select>
@@ -335,7 +333,7 @@ export default function NuevoRegistroWizard() {
                 className="w-full h-12 px-4 bg-surface-2 border border-border rounded-xl text-text focus:outline-none focus:border-accent transition-colors appearance-none"
               >
                 <option value="">Seleccione Sub Proyecto</option>
-                {SUB_PROYECTOS.map((s) => (
+                {catalogs?.subProyectos.map((s) => (
                   <option key={s} value={s}>{s}</option>
                 ))}
               </select>
@@ -518,7 +516,7 @@ export default function NuevoRegistroWizard() {
               <div className="grid grid-cols-2 gap-2">
                 <div>
                   <p className="text-[10px] text-text-muted uppercase">Vehículo</p>
-                  <p className="text-text font-medium">{VEHICULOS.find(v => v.id === form.vehiculoId)?.nombre || '-'}</p>
+                  <p className="text-text font-medium">{catalogs?.vehiculos.find(v => v.id === form.vehiculoId)?.nombre || '-'}</p>
                 </div>
                 <div>
                   <p className="text-[10px] text-text-muted uppercase">Combustible</p>

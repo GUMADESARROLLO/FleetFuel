@@ -1,5 +1,4 @@
 import type { RegistroCombustible, DraftRegistro } from './types';
-import { VEHICULOS } from './constants';
 import { saveRegistroDB, getAllRegistrosDB, getRegistroByIdDB } from './idb';
 import { apiGetRegistros, apiGetRegistroById, apiSaveRegistro, apiSyncRegistros, apiUploadImage } from './api';
 

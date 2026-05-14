@@ -25,6 +25,7 @@ const pageTitle = title ? `${title} - FleetFuel` : 'FleetFuel';
     <meta name="description" content="Control total de tu flota, en la palma de tu mano" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
+    <link rel="manifest" href="/manifest.webmanifest" />
     <link rel="preload" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=DM+Sans:wght@400;500;600;700&display=swap" as="style" crossorigin />
     <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -40,7 +41,19 @@ const pageTitle = title ? `${title} - FleetFuel` : 'FleetFuel';
     <slot name="nav" />
     <InstallPrompt client:load />
     <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js', { scope: '/' });
+        });
+      }
+    </script>
+    <script>
+      function setLastOnline() {
+        localStorage.setItem('fleetfuel_last_online', Date.now().toString());
+      }
+
       window.addEventListener('online', () => {
+        setLastOnline();
         const pending = localStorage.getItem('fleetfuel_pending_sync');
         if (pending) {
           try {
@@ -61,6 +74,8 @@ const pageTitle = title ? `${title} - FleetFuel` : 'FleetFuel';
 
       if (!navigator.onLine) {
         document.body.classList.add('is-offline');
+      } else {
+        setLastOnline();
       }
     </script>
   </body>

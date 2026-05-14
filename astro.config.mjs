@@ -55,6 +55,19 @@ export default defineConfig({
         navigateFallbackDenylist: [/\/api\//, /\/_astro\//],
         runtimeCaching: [
           {
+            urlPattern: /^\/(?!api\/|_astro\/)[^.]*$/,
+            handler: 'NetworkFirst',
+            options: {
+              cacheName: 'pages-cache',
+              networkTimeoutSeconds: 4,
+              expiration: {
+                maxEntries: 50,
+                maxAgeSeconds: 30 * 24 * 60 * 60,
+              },
+              cacheableResponse: { statuses: [0, 200] },
+            },
+          },
+          {
             urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
             handler: 'CacheFirst',
             options: {
@@ -78,5 +91,8 @@ export default defineConfig({
   ],
   vite: {
     plugins: [tailwindcss()],
+    css: {
+      devSourcemap: false,
+    },
   },
 });

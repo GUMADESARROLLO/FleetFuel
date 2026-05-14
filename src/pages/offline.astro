@@ -15,31 +15,205 @@ import '../styles/global.css';
     <meta name="description" content="Control total de tu flota, en la palma de tu mano" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
+    <link rel="manifest" href="/manifest.webmanifest" />
     <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
     <title>Sin conexión - FleetFuel</title>
   </head>
-  <body class="bg-bg text-text min-h-screen flex flex-col items-center justify-center px-6 dot-pattern">
-    <div class="w-full max-w-sm text-center">
-      <div class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-surface border border-border mb-6">
-        <svg class="w-10 h-10 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-          <path strokeLinecap="round" strokeLinejoin="round" d="M18.364 5.636a9 9 0 11-12.728 12.728M5.636 18.364a9 9 0 0112.728-12.728" />
-        </svg>
+  <body class="bg-bg text-text min-h-screen flex flex-col items-center px-6 py-8 dot-pattern">
+    <div class="w-full max-w-lg mx-auto">
+      <div class="text-center mb-8">
+        <div class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-surface border border-border mb-6">
+          <svg class="w-10 h-10 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M18.364 5.636a9 9 0 11-12.728 12.728M5.636 18.364a9 9 0 0112.728-12.728" />
+          </svg>
+        </div>
+        <h1 class="font-display font-bold text-2xl text-text mb-2">Sin conexión</h1>
+        <p class="text-text-muted text-sm leading-relaxed mb-2">
+          No hay acceso a Internet. Los registros se guardarán localmente y se sincronizarán automáticamente cuando vuelvas a estar en línea.
+        </p>
+        <div id="last-online" class="text-[11px] text-text-muted/60 hidden">
+          Última vez en línea: <span id="last-online-time"></span>
+        </div>
       </div>
-      <h1 class="font-display font-bold text-2xl text-text mb-2">Sin conexión</h1>
-      <p class="text-text-muted text-sm leading-relaxed mb-8">
-        No hay acceso a Internet. Los registros se guardarán localmente y se sincronizarán automáticamente cuando vuelvas a estar en línea.
-      </p>
-      <button
-        onclick="window.location.reload()"
-        class="inline-flex items-center gap-2 h-12 px-6 bg-accent hover:bg-accent/90 text-white font-bold rounded-xl transition-colors mx-auto"
-      >
-        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-          <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-        </svg>
-        Reintentar
-      </button>
+
+      <div id="pending-sync" class="hidden mb-4">
+        <div class="bg-accent/10 border border-accent/20 rounded-xl px-4 py-3 flex items-center gap-3">
+          <svg class="w-5 h-5 text-accent shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+          </svg>
+          <div class="flex-1 min-w-0">
+            <p class="text-sm font-bold text-accent">
+              <span id="pending-count"></span> registro(s) pendiente(s) de sincronizar
+            </p>
+            <p class="text-xs text-text-muted">Se enviarán automáticamente al recuperar conexión</p>
+          </div>
+        </div>
+      </div>
+
+      <div id="cached-data" class="hidden mb-6">
+        <h3 class="text-sm font-bold text-text mb-3 uppercase tracking-wider flex items-center gap-2">
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          </svg>
+          Últimos registros locales
+        </h3>
+        <div id="cached-list" class="space-y-2"></div>
+      </div>
+
+      <div class="flex flex-col gap-3">
+        <button
+          onclick="window.location.reload()"
+          class="w-full inline-flex items-center justify-center gap-2 h-12 px-6 bg-accent hover:bg-accent/90 text-white font-bold rounded-xl transition-colors"
+        >
+          <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+          </svg>
+          Reintentar
+        </button>
+
+        <div class="grid grid-cols-3 gap-2">
+          <a
+            href="/dashboard"
+            class="flex flex-col items-center gap-1.5 bg-surface border border-border rounded-xl py-3 px-2 hover:border-accent/30 transition-colors text-center"
+          >
+            <svg class="w-5 h-5 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+            </svg>
+            <span class="text-[10px] font-medium text-text-muted">Dashboard</span>
+          </a>
+          <a
+            href="/nuevo-registro"
+            class="flex flex-col items-center gap-1.5 bg-surface border border-border rounded-xl py-3 px-2 hover:border-accent/30 transition-colors text-center"
+          >
+            <svg class="w-5 h-5 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+            </svg>
+            <span class="text-[10px] font-medium text-text-muted">Nuevo Registro</span>
+          </a>
+          <a
+            href="/reportes"
+            class="flex flex-col items-center gap-1.5 bg-surface border border-border rounded-xl py-3 px-2 hover:border-accent/30 transition-colors text-center"
+          >
+            <svg class="w-5 h-5 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+            <span class="text-[10px] font-medium text-text-muted">Reportes</span>
+          </a>
+        </div>
+      </div>
     </div>
+
+    <script>
+      (function () {
+        const PENDING_KEY = 'fleetfuel_pending_sync';
+
+        function getPendingIds() {
+          try {
+            const raw = localStorage.getItem(PENDING_KEY);
+            return raw ? JSON.parse(raw) : [];
+          } catch { return []; }
+        }
+
+        function openIDB() {
+          return new Promise((resolve, reject) => {
+            const req = indexedDB.open('fleetfuel', 1);
+            req.onsuccess = () => resolve(req.result);
+            req.onerror = () => reject(req.error);
+          });
+        }
+
+        async function getRecentRecords(limit = 10) {
+          try {
+            const db = await openIDB();
+            return new Promise((resolve, reject) => {
+              const tx = db.transaction('registros', 'readonly');
+              const store = tx.objectStore('registros');
+              const req = store.getAll();
+              req.onsuccess = () => {
+                const all = req.result || [];
+                resolve(all.slice(0, limit));
+              };
+              req.onerror = () => reject(req.error);
+            });
+          } catch { return []; }
+        }
+
+        function formatDate(dateStr) {
+          const d = new Date(dateStr);
+          return d.toLocaleDateString('es-MX', {
+            day: '2-digit', month: 'short', year: 'numeric',
+          });
+        }
+
+        function formatCurrency(value) {
+          return new Intl.NumberFormat('es-NI', {
+            style: 'currency', currency: 'NIO', minimumFractionDigits: 2,
+          }).format(value);
+        }
+
+        async function init() {
+          const pending = getPendingIds();
+          const pendingEl = document.getElementById('pending-sync');
+          const pendingCount = document.getElementById('pending-count');
+          if (pending.length > 0) {
+            pendingCount.textContent = pending.length;
+            pendingEl.classList.remove('hidden');
+          }
+
+          const records = await getRecentRecords(5);
+          const cachedData = document.getElementById('cached-data');
+          const cachedList = document.getElementById('cached-list');
+          if (records.length > 0) {
+            cachedList.innerHTML = records.map((r) => {
+              const sincro = r.sincronizado
+                ? '<span class="text-[10px] text-success">Sincronizado</span>'
+                : '<span class="text-[10px] text-accent">Pendiente</span>';
+              return `<a href="/reportes/${r.id}" class="flex items-center gap-3 bg-surface rounded-xl border border-border p-3 hover:border-accent/30 transition-colors active:scale-[0.99]">
+                <div class="w-10 h-10 rounded-full bg-accent/15 flex items-center justify-center shrink-0">
+                  <svg class="w-5 h-5 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 2C9 7 6 11 6 14a6 6 0 1012 0c0-3-3-7-6-12z" />
+                  </svg>
+                </div>
+                <div class="flex-1 min-w-0">
+                  <div class="flex items-center gap-2">
+                    <span class="text-xs font-medium text-text truncate">${r.vehiculoNombre || 'Vehículo'}</span>
+                    <span class="text-[10px] text-text-muted">${formatDate(r.fechaCreacion)}</span>
+                  </div>
+                  <div class="flex items-center gap-3 mt-0.5">
+                    <span class="text-xs text-text-muted">${(r.litros || 0).toFixed(1)} L</span>
+                    <span class="text-xs font-bold text-accent">${formatCurrency(r.importeTotal || 0)}</span>
+                    ${sincro}
+                  </div>
+                </div>
+                <svg class="w-4 h-4 text-text-muted shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                </svg>
+              </a>`;
+            }).join('');
+            cachedData.classList.remove('hidden');
+          }
+
+          const lastOnline = localStorage.getItem('fleetfuel_last_online');
+          const lastOnlineEl = document.getElementById('last-online');
+          const lastOnlineTime = document.getElementById('last-online-time');
+          if (lastOnline) {
+            lastOnlineTime.textContent = new Date(parseInt(lastOnline)).toLocaleString('es-MX', {
+              day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit',
+            });
+            lastOnlineEl.classList.remove('hidden');
+          }
+
+          window.addEventListener('online', () => {
+            window.location.reload();
+          });
+        }
+
+        if (typeof indexedDB !== 'undefined') {
+          init();
+        }
+      })();
+    </script>
   </body>
 </html>

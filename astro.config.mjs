@@ -52,7 +52,7 @@ export default defineConfig({
       workbox: {
         globPatterns: ['**/*.{js,css,html,svg,png,woff2,woff,ttf}'],
         navigateFallback: '/offline',
-        navigateFallbackDenylist: [/\/api\//],
+        navigateFallbackDenylist: [/\/api\//, /\/_astro\//],
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,

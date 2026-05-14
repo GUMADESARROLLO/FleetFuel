@@ -75,6 +75,8 @@ export default function NuevoRegistroWizard() {
     if (s === 1) {
       if (!form.fotoOdometroAntes) errs.fotoOdometroAntes = 'Requerido';
       if (!form.fotoOdometroDespues) errs.fotoOdometroDespues = 'Requerido';
+      if (!form.fotoFactura) errs.fotoFactura = 'Requerido';
+      if (!form.fotoVoucher) errs.fotoVoucher = 'Requerido';
     } else if (s === 2) {
       if (!form.vehiculoId) errs.vehiculoId = 'Selecciona un vehículo';
       if (!form.tipoCombustible) errs.tipoCombustible = 'Selecciona un tipo';
@@ -111,9 +113,11 @@ export default function NuevoRegistroWizard() {
   };
 
   const handleSave = async () => {
-    if (!validateStep(3)) {
-      setStep(3);
-      return;
+    for (const s of [1, 2, 3]) {
+      if (!validateStep(s)) {
+        setStep(s);
+        return;
+      }
     }
 
     const session = getSession();
@@ -236,7 +240,7 @@ export default function NuevoRegistroWizard() {
   }
 
   const isStep2Valid = form.vehiculoId && form.tipoCombustible && form.proveedor && form.subProyecto && form.kilometraje && form.fechaFactura;
-  const isStep1Valid = form.fotoOdometroAntes && form.fotoOdometroDespues;
+  const isStep1Valid = form.fotoOdometroAntes && form.fotoOdometroDespues && form.fotoFactura && form.fotoVoucher;
 
   return (
     <div className="px-4 py-4 max-w-lg mx-auto">
@@ -251,11 +255,13 @@ export default function NuevoRegistroWizard() {
               label="Odómetro Antes"
               value={form.fotoOdometroAntes}
               onChange={(v) => updateField('fotoOdometroAntes', v)}
+              required
             />
             <PhotoUpload
               label="Odómetro Después"
               value={form.fotoOdometroDespues}
               onChange={(v) => updateField('fotoOdometroDespues', v)}
+              required
             />
             <PhotoUpload
               label="Factura / Vale"
@@ -271,15 +277,23 @@ export default function NuevoRegistroWizard() {
             />
           </div>
           {errors.fotoOdometroAntes && (
-            <p className="text-sm text-danger mb-4 animate-fade-in">Los odómetros antes y después son obligatorios</p>
+            <p className="text-sm text-danger mb-4 animate-fade-in">Todas las fotos de evidencia son obligatorias</p>
           )}
-          <button
-            onClick={nextStep}
-            disabled={hydrated && !isStep1Valid}
-            className="w-full h-12 bg-accent hover:bg-accent/90 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold rounded-xl transition-all touch-target"
-          >
-            Siguiente
-          </button>
+          <div className="flex gap-3">
+            <button
+              onClick={() => (window.location.href = '/dashboard')}
+              className="flex-1 h-12 bg-surface-2 hover:bg-surface-2/80 text-text font-medium rounded-xl transition-colors touch-target"
+            >
+              Cancelar
+            </button>
+            <button
+              onClick={nextStep}
+              disabled={hydrated && !isStep1Valid}
+              className="flex-1 h-12 bg-accent hover:bg-accent/90 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold rounded-xl transition-all touch-target"
+            >
+              Siguiente
+            </button>
+          </div>
         </div>
       )}
 
@@ -374,6 +388,12 @@ export default function NuevoRegistroWizard() {
               Siguiente
             </button>
           </div>
+          <button
+            onClick={() => (window.location.href = '/dashboard')}
+            className="w-full h-12 mt-3 border border-border hover:bg-surface text-text-muted font-medium rounded-xl transition-colors touch-target"
+          >
+            Cancelar
+          </button>
         </div>
       )}
 
@@ -489,6 +509,12 @@ export default function NuevoRegistroWizard() {
               Siguiente
             </button>
           </div>
+          <button
+            onClick={() => (window.location.href = '/dashboard')}
+            className="w-full h-12 mt-3 border border-border hover:bg-surface text-text-muted font-medium rounded-xl transition-colors touch-target"
+          >
+            Cancelar
+          </button>
         </div>
       )}
 

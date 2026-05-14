@@ -4,7 +4,11 @@ import { getRegistroById, formatCurrency, formatDate } from '../lib/storage';
 import { getImageUrl } from '../lib/imageUrl';
 import type { RegistroCombustible } from '../lib/types';
 
-export default function ReporteDetalle({ id }: { id: string }) {
+export default function ReporteDetalle({ id: _id }: { id: string }) {
+  // Use URL path as source of truth so any cached shell serves any record offline
+  const id = typeof window !== 'undefined'
+    ? window.location.pathname.replace(/^\/reportes\//, '')
+    : _id;
   const [registro, setRegistro] = useState<RegistroCombustible | null>(null);
   const [lightboxImg, setLightboxImg] = useState<string | null>(null);
   const [backUrl, setBackUrl] = useState('/reportes');

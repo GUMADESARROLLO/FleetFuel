@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { getSession, requireAuth } from '../lib/auth';
+import { getSession, requireAuth, isAdmin } from '../lib/auth';
 import { getRegistroById, formatCurrency, formatDate } from '../lib/storage';
 import { getImageUrl } from '../lib/imageUrl';
 import type { RegistroCombustible } from '../lib/types';
@@ -13,7 +13,7 @@ export default function ReporteDetalle({ id }: { id: string }) {
     requireAuth();
     const session = getSession();
     if (!session) return;
-    setBackUrl(session.role === 'admin' ? '/admin/dashboard' : '/reportes');
+    setBackUrl(isAdmin() ? '/admin/dashboard' : '/reportes');
     (async () => {
       const r = await getRegistroById(session.id, id);
       setRegistro(r || null);

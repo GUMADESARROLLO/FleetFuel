@@ -37,7 +37,7 @@ export async function login(username: string, password: string): Promise<Session
 
 export function isAdmin(): boolean {
   const session = getSession();
-  return session?.role === 'admin';
+  return session?.role?.toLowerCase().includes('admin') ?? false;
 }
 
 export function logout(): void {

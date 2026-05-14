@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { isAuthenticated, login, getSession } from '../lib/auth';
+import { isAuthenticated, login, getSession, isAdmin } from '../lib/auth';
 
 export default function LoginForm() {
   const [username, setUsername] = useState('');
@@ -12,7 +12,7 @@ export default function LoginForm() {
   useEffect(() => {
     if (isAuthenticated()) {
       const session = getSession();
-      window.location.href = session?.role === 'admin' ? '/admin/dashboard' : '/dashboard';
+      window.location.href = isAdmin() ? '/admin/dashboard' : '/dashboard';
     }
   }, []);
 
@@ -33,9 +33,9 @@ export default function LoginForm() {
         return;
       }
 
-      const session = await login(trimmedUser, trimmedPass);
+        const session = await login(trimmedUser, trimmedPass);
       if (session) {
-        window.location.href = session.role === 'admin' ? '/admin/dashboard' : '/dashboard';
+        window.location.href = isAdmin() ? '/admin/dashboard' : '/dashboard';
       } else {
         setError('Credenciales incorrectas. Intenta de nuevo.');
         setShake(true);

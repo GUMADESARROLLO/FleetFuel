@@ -106,7 +106,7 @@ export default function PhotoUpload({ label, value, onChange, shape = 'rect', re
           </div>
         )}
       </button>
-      <input ref={inputRef} type="file" accept="image/*" className="hidden"
+      <input ref={inputRef} type="file" accept="image/*" capture="environment" className="hidden"
         onChange={(e) => {
           const file = e.target.files?.[0];
           if (file) handleFile(file);

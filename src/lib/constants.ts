@@ -1,11 +1,11 @@
-import type { Vehiculo } from './types';
+import type { Vehiculo, TipoCombustible, Proveedor, SubProyecto } from './types';
 import { apiGetVehiculos, apiGetTiposCombustible, apiGetProveedores, apiGetSubProyectos } from './api';
 
 export interface Catalogs {
   vehiculos: Vehiculo[];
-  tiposCombustible: string[];
-  proveedores: string[];
-  subProyectos: string[];
+  tiposCombustible: TipoCombustible[];
+  proveedores: Proveedor[];
+  subProyectos: SubProyecto[];
 }
 
 let cache: Catalogs | null = null;

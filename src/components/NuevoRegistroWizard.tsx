@@ -322,7 +322,7 @@ export default function NuevoRegistroWizard() {
               >
                 <option value="">Seleccione Tipo</option>
                 {catalogs?.tiposCombustible.map((t) => (
-                  <option key={t} value={t}>{t}</option>
+                  <option key={t.id} value={t.nombre}>{t.nombre}</option>
                 ))}
               </select>
             </FieldGroup>
@@ -335,7 +335,7 @@ export default function NuevoRegistroWizard() {
               >
                 <option value="">Seleccione Proveedor</option>
                 {catalogs?.proveedores.map((p) => (
-                  <option key={p} value={p}>{p}</option>
+                  <option key={p.id} value={p.nombre}>{p.nombre}</option>
                 ))}
               </select>
             </FieldGroup>
@@ -348,7 +348,7 @@ export default function NuevoRegistroWizard() {
               >
                 <option value="">Seleccione Sub Proyecto</option>
                 {catalogs?.subProyectos.map((s) => (
-                  <option key={s} value={s}>{s}</option>
+                  <option key={s.id} value={s.nombre}>{s.nombre}</option>
                 ))}
               </select>
             </FieldGroup>

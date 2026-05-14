@@ -23,6 +23,22 @@ export interface Vehiculo {
   id: string;
   nombre: string;
   placa: string;
+  activo?: number;
+}
+
+export interface TipoCombustible {
+  id: number;
+  nombre: string;
+}
+
+export interface Proveedor {
+  id: number;
+  nombre: string;
+}
+
+export interface SubProyecto {
+  id: number;
+  nombre: string;
 }
 
 export interface RegistroCombustible {

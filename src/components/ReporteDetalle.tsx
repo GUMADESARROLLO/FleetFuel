@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { getSession, requireAuth } from '../lib/auth';
 import { getRegistroById, formatCurrency, formatDate } from '../lib/storage';
+import { getImageUrl } from '../lib/imageUrl';
 import type { RegistroCombustible } from '../lib/types';
 
 export default function ReporteDetalle({ id }: { id: string }) {
@@ -32,10 +33,10 @@ export default function ReporteDetalle({ id }: { id: string }) {
   }
 
   const photos = [
-    { label: 'Odómetro Antes', src: registro.fotoOdometroAntes },
-    { label: 'Odómetro Después', src: registro.fotoOdometroDespues },
-    { label: 'Factura / Vale', src: registro.fotoFactura },
-    { label: 'Voucher / Placa', src: registro.fotoVoucher },
+    { label: 'Odómetro Antes', src: getImageUrl(registro.fotoOdometroAntes) },
+    { label: 'Odómetro Después', src: getImageUrl(registro.fotoOdometroDespues) },
+    { label: 'Factura / Vale', src: getImageUrl(registro.fotoFactura) },
+    { label: 'Voucher / Placa', src: getImageUrl(registro.fotoVoucher) },
   ].filter((p) => p.src);
 
   return (

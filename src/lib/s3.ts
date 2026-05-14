@@ -1,10 +1,11 @@
-import { S3Client } from '@aws-sdk/client-s3';
+import './db';
+import { S3Client, GetObjectCommand } from '@aws-sdk/client-s3';
 import { Upload } from '@aws-sdk/lib-storage';
-import { PutObjectCommand } from '@aws-sdk/client-s3';
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 
 let client: S3Client | null = null;
 
-function getClient(): S3Client {
+export function getClient(): S3Client {
   if (!client) {
     client = new S3Client({
       region: process.env.AWS_DEFAULT_REGION || 'us-east-1',
@@ -42,8 +43,7 @@ export async function uploadImage(
 
   await upload.done();
 
-  const baseUrl = process.env.AWS_URL || `http://localhost:9100/${getBucket()}/`;
-  return `${baseUrl}${key}`;
+  return `${getBucket()}/${key}`;
 }
 
 export function generateImageKey(
@@ -54,8 +54,18 @@ export function generateImageKey(
   return `registros/${username}/${registroId}/${field}.jpg`;
 }
 
+export async function getSignedImageUrl(key: string, expiresIn: number = 300): Promise<string> {
+  const command = new GetObjectCommand({
+    Bucket: getBucket(),
+    Key: key,
+    ResponseContentDisposition: 'inline',
+  });
+  return getSignedUrl(getClient(), command, { expiresIn });
+}
+
 export async function deleteImage(key: string): Promise<void> {
-  const command = new PutObjectCommand({
+  const { DeleteObjectCommand } = await import('@aws-sdk/client-s3');
+  const command = new DeleteObjectCommand({
     Bucket: getBucket(),
     Key: key,
   });

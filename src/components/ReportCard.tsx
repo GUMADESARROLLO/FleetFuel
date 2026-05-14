@@ -1,5 +1,6 @@
 import type { RegistroCombustible } from '../lib/types';
 import { formatCurrency, formatDate } from '../lib/storage';
+import { getImageUrl } from '../lib/imageUrl';
 
 interface ReportCardProps {
   registro: RegistroCombustible;
@@ -42,10 +43,10 @@ export default function ReportCard({ registro }: ReportCardProps) {
         </div>
         <div className="flex -space-x-2">
           {registro.fotoOdometroAntes && (
-            <img src={registro.fotoOdometroAntes} alt="" className="w-8 h-8 rounded-full border-2 border-surface object-cover" />
+            <img src={getImageUrl(registro.fotoOdometroAntes)} alt="" className="w-8 h-8 rounded-full border-2 border-surface object-cover" />
           )}
           {registro.fotoOdometroDespues && (
-            <img src={registro.fotoOdometroDespues} alt="" className="w-8 h-8 rounded-full border-2 border-surface object-cover" />
+            <img src={getImageUrl(registro.fotoOdometroDespues)} alt="" className="w-8 h-8 rounded-full border-2 border-surface object-cover" />
           )}
           {registro.fotoFactura && (
             <div className="w-8 h-8 rounded border-2 border-surface bg-surface-2 flex items-center justify-center">

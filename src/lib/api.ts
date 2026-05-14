@@ -85,3 +85,22 @@ export async function apiDeleteUsuario(username: string): Promise<void> {
     throw new Error(err.error || 'Error deleting usuario');
   }
 }
+
+export async function apiUploadImage(
+  base64: string,
+  username: string,
+  registroId: string,
+  field: string
+): Promise<string> {
+  const res = await fetch(`${BASE}/upload`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ base64, username, registroId, field }),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.error || 'Error uploading image');
+  }
+  const json = await res.json();
+  return json.url;
+}

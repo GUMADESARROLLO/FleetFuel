@@ -7,6 +7,7 @@ import {
   SUB_PROYECTOS,
 } from '../lib/constants';
 import { saveRegistro, saveDraft, getDraft, clearDraft, generateId, markPendingSync, formatCurrency } from '../lib/storage';
+import { apiUploadImage } from '../lib/api';
 import type { DraftRegistro, RegistroCombustible } from '../lib/types';
 import StepProgress from './StepProgress';
 import PhotoUpload from './PhotoUpload';
@@ -128,14 +129,43 @@ export default function NuevoRegistroWizard() {
     try {
       const vehiculo = VEHICULOS.find((v) => v.id === form.vehiculoId);
 
+      const id = generateId();
+
+      let fotoOdometroAntes = form.fotoOdometroAntes;
+      let fotoOdometroDespues = form.fotoOdometroDespues;
+      let fotoFactura = form.fotoFactura;
+      let fotoVoucher = form.fotoVoucher;
+
+      if (navigator.onLine) {
+        const uploads = [
+          { base64: fotoOdometroAntes, key: 'odometro_antes' },
+          { base64: fotoOdometroDespues, key: 'odometro_despues' },
+          { base64: fotoFactura, key: 'factura' },
+          { base64: fotoVoucher, key: 'voucher' },
+        ];
+        for (const u of uploads) {
+          if (u.base64 && u.base64.startsWith('data:')) {
+            try {
+              u.base64 = await apiUploadImage(u.base64, session.username, id, u.key);
+            } catch {
+              // keep base64 if upload fails
+            }
+          }
+        }
+        fotoOdometroAntes = uploads[0].base64;
+        fotoOdometroDespues = uploads[1].base64;
+        fotoFactura = uploads[2].base64;
+        fotoVoucher = uploads[3].base64;
+      }
+
       const registro: RegistroCombustible = {
-        id: generateId(),
+        id,
         userId: session.username,
         fechaCreacion: new Date().toISOString(),
-        fotoOdometroAntes: form.fotoOdometroAntes,
-        fotoOdometroDespues: form.fotoOdometroDespues,
-        fotoFactura: form.fotoFactura,
-        fotoVoucher: form.fotoVoucher,
+        fotoOdometroAntes,
+        fotoOdometroDespues,
+        fotoFactura,
+        fotoVoucher,
         vehiculoId: form.vehiculoId,
         vehiculoNombre: vehiculo?.nombre || '',
         vehiculoPlaca: vehiculo?.placa || '',

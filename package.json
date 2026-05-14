@@ -15,6 +15,8 @@
   "dependencies": {
     "@astrojs/node": "^10.1.1",
     "@astrojs/react": "^5.0.5",
+    "@aws-sdk/client-s3": "^3.1046.0",
+    "@aws-sdk/lib-storage": "^3.1046.0",
     "@tailwindcss/vite": "^4.1.0",
     "@vite-pwa/astro": "^1.0.0",
     "astro": "^6.3.0",

@@ -1,7 +1,7 @@
 import type { RegistroCombustible, DraftRegistro } from './types';
 import { VEHICULOS } from './constants';
 import { saveRegistroDB, getAllRegistrosDB, getRegistroByIdDB } from './idb';
-import { apiGetRegistros, apiGetRegistroById, apiSaveRegistro, apiSyncRegistros } from './api';
+import { apiGetRegistros, apiGetRegistroById, apiSaveRegistro, apiSyncRegistros, apiUploadImage } from './api';
 
 const DRAFT_KEY = 'fleetfuel_draft';
 const PENDING_SYNC_KEY = 'fleetfuel_pending_sync';
@@ -64,11 +64,33 @@ export async function syncPendingRegistros(ids: string[]): Promise<void> {
   for (const id of ids) {
     try {
       const reg = await getRegistroByIdDB(id);
-      if (reg) {
-        reg.sincronizado = true;
-        await apiSaveRegistro(reg);
-        await saveRegistroDB(reg);
+      if (!reg) continue;
+
+      const session = JSON.parse(localStorage.getItem('fleetfuel_session') || '{}');
+      const username = session.username || 'unknown';
+
+      const imageFields = [
+        { field: 'fotoOdometroAntes', key: 'odometro_antes' },
+        { field: 'fotoOdometroDespues', key: 'odometro_despues' },
+        { field: 'fotoFactura', key: 'factura' },
+        { field: 'fotoVoucher', key: 'voucher' },
+      ] as const;
+
+      for (const { field, key } of imageFields) {
+        const value = reg[field as keyof RegistroCombustible] as string;
+        if (value && value.startsWith('data:')) {
+          try {
+            const url = await apiUploadImage(value, username, reg.id, key);
+            (reg as any)[field] = url;
+          } catch {
+            // if image upload fails, keep base64 for later retry
+          }
+        }
       }
+
+      reg.sincronizado = true;
+      await apiSaveRegistro(reg);
+      await saveRegistroDB(reg);
     } catch {
       // skip failed syncs
     }

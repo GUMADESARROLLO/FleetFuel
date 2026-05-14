@@ -125,9 +125,12 @@ export default function DashboardContent() {
                     <span className="text-xs font-bold text-accent">{formatCurrency(r.importeTotal || 0)}</span>
                   </div>
                 </div>
-                <svg className="w-4 h-4 text-text-muted shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
+                <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold shrink-0 ${
+                  r.sincronizado ? 'bg-success/15 text-success' : 'bg-accent/15 text-accent'
+                }`}>
+                  <span className={`w-1.5 h-1.5 rounded-full ${r.sincronizado ? 'bg-success' : 'bg-accent'}`} />
+                  {r.sincronizado ? 'Sincronizado' : 'Pendiente'}
+                </span>
               </a>
             ))}
           </div>

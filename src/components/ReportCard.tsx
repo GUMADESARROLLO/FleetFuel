@@ -19,9 +19,12 @@ export default function ReportCard({ registro }: ReportCardProps) {
           </span>
           <span className="text-[10px] text-text-muted">{registro.vehiculoPlaca}</span>
         </div>
-        <svg className="w-4 h-4 text-text-muted flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-        </svg>
+        <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold ${
+          registro.sincronizado ? 'bg-success/15 text-success' : 'bg-accent/15 text-accent'
+        }`}>
+          <span className={`w-1.5 h-1.5 rounded-full ${registro.sincronizado ? 'bg-success' : 'bg-accent'}`} />
+          {registro.sincronizado ? 'Sincronizado' : 'Pendiente'}
+        </span>
       </div>
 
       <div className="flex items-center gap-3 mb-3">

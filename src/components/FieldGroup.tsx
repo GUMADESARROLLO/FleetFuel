@@ -17,7 +17,7 @@ export default function FieldGroup({ label, required, error, children, className
       </label>
       {children}
       {error && (
-        <p className="text-xs text-danger mt-0.5 animate-fade-in">{error}</p>
+        <p className="text-sm text-danger mt-1 animate-fade-in">{error}</p>
       )}
     </div>
   );

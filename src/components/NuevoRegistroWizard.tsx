@@ -58,15 +58,12 @@ export default function NuevoRegistroWizard() {
     saveDraft(form);
   }, [form]);
 
+  const NUMERIC_FIELDS = new Set(['kilometraje', 'litros', 'importeTotal', 'gravadas', 'isr', 'excedentes']);
+
   const updateField = (field: keyof DraftRegistro, value: string) => {
-    setForm((prev) => ({ ...prev, [field]: value }));
-    if (errors[field]) {
-      setErrors((prev) => {
-        const next = { ...prev };
-        delete next[field];
-        return next;
-      });
-    }
+    if (field === 'kilometraje') value = value.replace(/[^0-9]/g, '');
+    else if (NUMERIC_FIELDS.has(field)) value = value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');
+    setForm(f => ({ ...f, [field]: value }));
   };
 
   const validateStep = (s: number): boolean => {
@@ -83,12 +80,15 @@ export default function NuevoRegistroWizard() {
       if (!form.proveedor) errs.proveedor = 'Selecciona un proveedor';
       if (!form.subProyecto) errs.subProyecto = 'Selecciona un proyecto';
       if (!form.kilometraje) errs.kilometraje = 'Ingresa el kilometraje';
+      else if (isNaN(Number(form.kilometraje)) || Number(form.kilometraje) <= 0) errs.kilometraje = 'Kilometraje inválido';
       if (!form.fechaFactura) errs.fechaFactura = 'Selecciona la fecha';
     } else if (s === 3) {
       if (!form.numeroFactura) errs.numeroFactura = 'Requerido';
       if (!form.numeroVoucher) errs.numeroVoucher = 'Requerido';
       if (!form.litros) errs.litros = 'Ingresa los litros';
+      else if (isNaN(Number(form.litros)) || Number(form.litros) <= 0) errs.litros = 'Litros inválido';
       if (!form.importeTotal) errs.importeTotal = 'Ingresa el importe';
+      else if (isNaN(Number(form.importeTotal)) || Number(form.importeTotal) <= 0) errs.importeTotal = 'Importe inválido';
     }
 
     setErrors(errs);

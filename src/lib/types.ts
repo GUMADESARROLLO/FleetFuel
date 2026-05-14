@@ -4,6 +4,7 @@ export interface User {
 }
 
 export interface Usuario {
+  id: number;
   username: string;
   nombre: string;
   password?: string;
@@ -11,6 +12,7 @@ export interface Usuario {
 }
 
 export interface Session {
+  id: number;
   username: string;
   nombre: string;
   role: 'admin' | 'conductor';
@@ -25,7 +27,7 @@ export interface Vehiculo {
 
 export interface RegistroCombustible {
   id: string;
-  userId: string;
+  userId: number;
   fechaCreacion: string;
   fotoOdometroAntes: string;
   fotoOdometroDespues: string;

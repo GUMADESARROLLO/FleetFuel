@@ -15,7 +15,7 @@ export default function ReporteDetalle({ id }: { id: string }) {
     if (!session) return;
     setBackUrl(session.role === 'admin' ? '/admin/dashboard' : '/reportes');
     (async () => {
-      const r = await getRegistroById(session.username, id);
+      const r = await getRegistroById(session.id, id);
       setRegistro(r || null);
     })();
   }, [id]);

@@ -5,7 +5,7 @@ import { apiGetRegistros, apiGetRegistroById, apiSaveRegistro, apiSyncRegistros,
 const DRAFT_KEY = 'fleetfuel_draft';
 const PENDING_SYNC_KEY = 'fleetfuel_pending_sync';
 
-export async function getRegistros(userId?: string): Promise<RegistroCombustible[]> {
+export async function getRegistros(userId?: number): Promise<RegistroCombustible[]> {
   if (typeof window === 'undefined') return [];
   if (navigator.onLine) {
     try {
@@ -22,7 +22,7 @@ export async function getRegistros(userId?: string): Promise<RegistroCombustible
 }
 
 export async function saveRegistro(
-  userId: string,
+  userId: number,
   registro: RegistroCombustible
 ): Promise<void> {
   if (typeof window === 'undefined') return;
@@ -39,7 +39,7 @@ export async function saveRegistro(
 }
 
 export async function getRegistroById(
-  userId: string,
+  userId: number,
   id: string
 ): Promise<RegistroCombustible | undefined> {
   if (typeof window === 'undefined') return undefined;
@@ -97,7 +97,7 @@ export async function syncPendingRegistros(ids: string[]): Promise<void> {
 }
 
 export async function getRegistrosDelMes(
-  userId: string
+  userId: number
 ): Promise<RegistroCombustible[]> {
   const now = new Date();
   const mes = now.getMonth();
@@ -111,7 +111,7 @@ export async function getRegistrosDelMes(
 }
 
 export async function getRegistrosPorMes(
-  userId: string,
+  userId: number,
   mes: number,
   anio: number
 ): Promise<RegistroCombustible[]> {
@@ -123,24 +123,24 @@ export async function getRegistrosPorMes(
 }
 
 export async function getUltimosRegistros(
-  userId: string,
+  userId: number,
   count: number = 5
 ): Promise<RegistroCombustible[]> {
   const registros = await getRegistros(userId);
   return registros.slice(0, count);
 }
 
-export async function getTotalLitros(userId: string): Promise<number> {
+export async function getTotalLitros(userId: number): Promise<number> {
   const registros = await getRegistrosDelMes(userId);
   return registros.reduce((sum, r) => sum + (r.litros || 0), 0);
 }
 
-export async function getTotalImporte(userId: string): Promise<number> {
+export async function getTotalImporte(userId: number): Promise<number> {
   const registros = await getRegistrosDelMes(userId);
   return registros.reduce((sum, r) => sum + (r.importeTotal || 0), 0);
 }
 
-export async function getUltimoVehiculo(userId: string): Promise<string> {
+export async function getUltimoVehiculo(userId: number): Promise<string> {
   const registros = await getRegistros(userId);
   if (registros.length === 0) return 'Ninguno';
   return registros[0].vehiculoNombre || 'Desconocido';
@@ -215,7 +215,7 @@ export function clearAllPendingSync(): void {
 }
 
 export async function getMesesDisponibles(
-  userId: string
+  userId: number
 ): Promise<{ mes: number; anio: number }[]> {
   const registros = await getRegistros(userId);
   const meses = new Set<string>();

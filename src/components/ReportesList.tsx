@@ -27,7 +27,7 @@ export default function ReportesList() {
     setSession(sess);
 
     (async () => {
-      const all = await getRegistros(sess.username);
+      const all = await getRegistros(sess.id);
       setRegistros(all);
     })();
   }, []);

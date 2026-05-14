@@ -24,10 +24,10 @@ export default function DashboardContent() {
     const sess = getSession();
     if (!sess) return;
     setSession(sess);
-    loadData(sess.username);
+    loadData(sess.id);
   }, []);
 
-  const loadData = async (userId: string) => {
+  const loadData = async (userId: number) => {
     const mes = await getRegistrosDelMes(userId);
     setTotalRegistros(mes.length);
     setTotalLitros(await getTotalLitros(userId));

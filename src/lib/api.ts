@@ -3,12 +3,12 @@ import type { RegistroCombustible, Usuario, Vehiculo } from './types';
 const BASE = '/api';
 
 export async function apiGetRegistros(params?: {
-  userId?: string;
+  userId?: number;
   desde?: string;
   hasta?: string;
 }): Promise<RegistroCombustible[]> {
   const search = new URLSearchParams();
-  if (params?.userId) search.set('userId', params.userId);
+  if (params?.userId) search.set('userId', String(params.userId));
   if (params?.desde) search.set('desde', params.desde);
   if (params?.hasta) search.set('hasta', params.hasta);
   const qs = search.toString();

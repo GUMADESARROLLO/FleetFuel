@@ -1,3 +1,4 @@
+import bcrypt from 'bcryptjs';
 import { query } from '../../../lib/db';
 
 export async function POST({ request }: { request: Request }) {
@@ -12,8 +13,8 @@ export async function POST({ request }: { request: Request }) {
     }
 
     const rows = await query<any[]>(
-      'SELECT username, nombre, role FROM usuarios WHERE username = ? AND password = ?',
-      [username, password]
+      'SELECT id, username, nombre, role, password FROM usuarios WHERE username = ?',
+      [username]
     );
 
     if (rows.length === 0) {
@@ -24,7 +25,17 @@ export async function POST({ request }: { request: Request }) {
     }
 
     const user = rows[0];
+
+    const valid = await bcrypt.compare(password, user.password);
+    if (!valid) {
+      return new Response(JSON.stringify({ error: 'Credenciales incorrectas' }), {
+        status: 401,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
     return new Response(JSON.stringify({
+      id: user.id,
       username: user.username,
       nombre: user.nombre,
       role: user.role,

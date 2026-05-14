@@ -158,7 +158,7 @@ export default function NuevoRegistroWizard() {
 
       const registro: RegistroCombustible = {
         id,
-        userId: session.username,
+        userId: session.id,
         fechaCreacion: new Date().toISOString(),
         fotoOdometroAntes,
         fotoOdometroDespues,
@@ -184,7 +184,7 @@ export default function NuevoRegistroWizard() {
       };
 
       const [result] = await Promise.all([
-        saveRegistro(session.username, registro),
+        saveRegistro(session.id, registro),
         new Promise(r => setTimeout(r, 900)),
       ]);
 

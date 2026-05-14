@@ -3,7 +3,7 @@ import { query } from '../../lib/db';
 export async function GET() {
   try {
     const rows = await query<any[]>(
-      'SELECT username, nombre, role FROM usuarios ORDER BY role, nombre'
+      'SELECT id, username, nombre, role FROM usuarios ORDER BY role, nombre'
     );
     return new Response(JSON.stringify({ data: rows }), {
       status: 200,

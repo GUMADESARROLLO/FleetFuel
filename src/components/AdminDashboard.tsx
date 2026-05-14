@@ -64,7 +64,7 @@ export default function AdminDashboard() {
       data = data.filter(r => new Date(r.fechaCreacion) <= new Date(dateHasta.getFullYear(), dateHasta.getMonth(), dateHasta.getDate(), 23, 59, 59));
     }
     if (filtroConductor) {
-      data = data.filter(r => r.userId === filtroConductor);
+      data = data.filter(r => r.userId === Number(filtroConductor));
     }
     return data.sort((a, b) => new Date(b.fechaCreacion).getTime() - new Date(a.fechaCreacion).getTime());
   }, [registros, dateDesde, dateHasta, filtroConductor]);
@@ -80,8 +80,8 @@ export default function AdminDashboard() {
   const porConductor = useMemo(() => {
     const map = new Map<string, { nombre: string; registros: number; litros: number; importe: number }>();
     filtered.forEach(r => {
-      const u = usuarios.find(u => u.username === r.userId);
-      const nombre = u?.nombre || r.userId;
+      const u = usuarios.find(u => u.id === r.userId);
+      const nombre = u?.nombre || String(r.userId);
       const existing = map.get(r.userId) || { nombre, registros: 0, litros: 0, importe: 0 };
       existing.registros++;
       existing.litros += r.litros || 0;
@@ -203,7 +203,7 @@ export default function AdminDashboard() {
               >
                 <option value="">Todos</option>
                 {usuarios.filter(u => u.role === 'conductor').map(u => (
-                  <option key={u.username} value={u.username}>{u.nombre}</option>
+                  <option key={u.id} value={u.id}>{u.nombre}</option>
                 ))}
               </select>
             </div>
@@ -303,11 +303,11 @@ export default function AdminDashboard() {
                     </thead>
                     <tbody>
                       {filtered.map(r => {
-                        const conductor = usuarios.find(u => u.username === r.userId);
+                        const conductor = usuarios.find(u => u.id === r.userId);
                         return (
                           <tr key={r.id} className="border-b border-border/50 hover:bg-bg/30 transition-colors">
                             <td className="py-3 px-4 text-text whitespace-nowrap">{formatDate(r.fechaCreacion)}</td>
-                            <td className="py-3 px-4 text-text">{conductor?.nombre || r.userId}</td>
+                            <td className="py-3 px-4 text-text">{conductor?.nombre || String(r.userId)}</td>
                             <td className="py-3 px-4 text-text">{r.vehiculoNombre}</td>
                             <td className="py-3 px-4 text-right text-text whitespace-nowrap">{r.litros?.toFixed(1) || '0'} L</td>
                             <td className="py-3 px-4 text-right text-accent font-bold whitespace-nowrap">{formatCurrency(r.importeTotal || 0)}</td>

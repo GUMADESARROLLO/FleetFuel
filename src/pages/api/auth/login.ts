@@ -13,7 +13,7 @@ export async function POST({ request }: { request: Request }) {
     }
 
     const rows = await query<any[]>(
-      'SELECT id, username, nombre, role, password FROM usuarios WHERE username = ?',
+      'SELECT u.id, u.username, u.nombre, r.nombre AS role, u.password FROM usuarios u JOIN roles r ON u.role_id = r.id WHERE u.username = ?',
       [username]
     );
 

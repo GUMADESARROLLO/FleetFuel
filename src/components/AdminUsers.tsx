@@ -1,14 +1,15 @@
 import { useEffect, useState } from 'react';
 import { getSession, requireAuth, isAdmin } from '../lib/auth';
-import { apiGetUsuarios, apiCreateUsuario, apiUpdateUsuario, apiDeleteUsuario } from '../lib/api';
+import { apiGetUsuarios, apiGetRoles, apiCreateUsuario, apiUpdateUsuario, apiDeleteUsuario } from '../lib/api';
 import type { Usuario } from '../lib/types';
 
 export default function AdminUsers() {
   const [usuarios, setUsuarios] = useState<Usuario[]>([]);
+  const [roles, setRoles] = useState<{ id: number; nombre: string }[]>([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [editing, setEditing] = useState<Usuario | null>(null);
-  const [form, setForm] = useState({ username: '', nombre: '', password: '', role: 'conductor' as 'admin' | 'conductor' });
+  const [form, setForm] = useState({ username: '', nombre: '', password: '', role: '' });
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
 
@@ -18,22 +19,26 @@ export default function AdminUsers() {
       window.location.href = '/login';
       return;
     }
-    loadUsuarios();
+    loadData();
   }, []);
 
-  async function loadUsuarios() {
+  async function loadData() {
     try {
-      const data = await apiGetUsuarios();
-      setUsuarios(data);
+      const [usuariosData, rolesData] = await Promise.all([
+        apiGetUsuarios(),
+        apiGetRoles(),
+      ]);
+      setUsuarios(usuariosData);
+      setRoles(rolesData);
     } catch (err: any) {
-      console.error('Error loading usuarios:', err);
+      console.error('Error loading data:', err);
     }
     setLoading(false);
   }
 
   function openCreate() {
     setEditing(null);
-    setForm({ username: '', nombre: '', password: '', role: 'conductor' });
+    setForm({ username: '', nombre: '', password: '', role: roles[0]?.nombre || '' });
     setError('');
     setShowModal(true);
   }
@@ -59,7 +64,7 @@ export default function AdminUsers() {
         await apiCreateUsuario(form);
       }
       setShowModal(false);
-      await loadUsuarios();
+      await loadData();
     } catch (err: any) {
       setError(err.message);
     }
@@ -70,7 +75,7 @@ export default function AdminUsers() {
     if (!confirm(`¿Eliminar usuario "${username}"?`)) return;
     try {
       await apiDeleteUsuario(username);
-      await loadUsuarios();
+      await loadData();
     } catch (err: any) {
       alert('Error: ' + err.message);
     }
@@ -141,11 +146,11 @@ export default function AdminUsers() {
                       <td className="py-3 px-4 text-text">{u.nombre}</td>
                       <td className="py-3 px-4">
                         <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-bold ${
-                          u.role === 'admin'
+                          u.role.toLowerCase().includes('admin')
                             ? 'bg-accent/15 text-accent'
                             : 'bg-primary/15 text-text'
                         }`}>
-                          {u.role === 'admin' ? (
+                          {u.role.toLowerCase().includes('admin') ? (
                             <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                               <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                             </svg>
@@ -154,7 +159,7 @@ export default function AdminUsers() {
                               <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                             </svg>
                           )}
-                          {u.role === 'admin' ? 'Admin' : 'Conductor'}
+                          {u.role.charAt(0).toUpperCase() + u.role.slice(1)}
                         </span>
                       </td>
                       <td className="py-3 px-4">
@@ -247,11 +252,12 @@ export default function AdminUsers() {
                 <label className="block text-sm font-medium text-text-muted mb-1">Rol</label>
                 <select
                   value={form.role}
-                  onChange={e => setForm(f => ({ ...f, role: e.target.value as 'admin' | 'conductor' }))}
+                  onChange={e => setForm(f => ({ ...f, role: e.target.value }))}
                   className="w-full h-11 px-3 bg-bg border border-border rounded-xl text-text focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-colors"
                 >
-                  <option value="conductor">Conductor</option>
-                  <option value="admin">Administrador</option>
+                  {roles.map(r => (
+                    <option key={r.id} value={r.nombre}>{r.nombre.charAt(0).toUpperCase() + r.nombre.slice(1)}</option>
+                  ))}
                 </select>
               </div>
 

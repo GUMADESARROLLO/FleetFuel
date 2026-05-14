@@ -86,6 +86,13 @@ export async function apiDeleteUsuario(username: string): Promise<void> {
   }
 }
 
+export async function apiGetRoles(): Promise<{ id: number; nombre: string }[]> {
+  const res = await fetch(`${BASE}/roles`);
+  if (!res.ok) throw new Error('Error fetching roles');
+  const json = await res.json();
+  return json.data || [];
+}
+
 export async function apiGetVehiculos(): Promise<Vehiculo[]> {
   const res = await fetch(`${BASE}/vehiculos`);
   if (!res.ok) throw new Error('Error fetching vehiculos');

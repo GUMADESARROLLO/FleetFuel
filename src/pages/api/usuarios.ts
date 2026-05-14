@@ -3,7 +3,7 @@ import { query } from '../../lib/db';
 export async function GET() {
   try {
     const rows = await query<any[]>(
-      'SELECT id, username, nombre, role FROM usuarios ORDER BY role, nombre'
+      'SELECT u.id, u.username, u.nombre, r.nombre AS role FROM usuarios u JOIN roles r ON u.role_id = r.id ORDER BY r.nombre, u.nombre'
     );
     return new Response(JSON.stringify({ data: rows }), {
       status: 200,
@@ -28,7 +28,8 @@ export async function POST({ request }: { request: Request }) {
       });
     }
 
-    if (!['admin', 'conductor'].includes(role)) {
+    const [roleRow] = await query<any[]>('SELECT id FROM roles WHERE nombre = ?', [role]);
+    if (!roleRow) {
       return new Response(JSON.stringify({ error: 'Rol inválido' }), {
         status: 400,
         headers: { 'Content-Type': 'application/json' },
@@ -36,8 +37,8 @@ export async function POST({ request }: { request: Request }) {
     }
 
     await query(
-      `INSERT INTO usuarios (username, nombre, password, role) VALUES (?, ?, ?, ?)`,
-      [username, nombre, password, role]
+      `INSERT INTO usuarios (username, nombre, password, role_id) VALUES (?, ?, ?, ?)`,
+      [username, nombre, password, roleRow.id]
     );
 
     return new Response(JSON.stringify({ success: true }), {
@@ -75,14 +76,15 @@ export async function PUT({ request }: { request: Request }) {
     if (nombre) { updates.push('nombre = ?'); params.push(nombre); }
     if (password) { updates.push('password = ?'); params.push(password); }
     if (role) {
-      if (!['admin', 'conductor'].includes(role)) {
+      const [roleRow] = await query<any[]>('SELECT id FROM roles WHERE nombre = ?', [role]);
+      if (!roleRow) {
         return new Response(JSON.stringify({ error: 'Rol inválido' }), {
           status: 400,
           headers: { 'Content-Type': 'application/json' },
         });
       }
-      updates.push('role = ?');
-      params.push(role);
+      updates.push('role_id = ?');
+      params.push(roleRow.id);
     }
 
     if (updates.length === 0) {

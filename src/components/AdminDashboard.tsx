@@ -202,7 +202,7 @@ export default function AdminDashboard() {
                 className="w-full h-10 px-3 bg-bg border border-border rounded-lg text-text text-sm focus:outline-none focus:border-accent transition-colors"
               >
                 <option value="">Todos</option>
-                {usuarios.filter(u => u.role === 'conductor').map(u => (
+                {usuarios.filter(u => u.role.toLowerCase().includes('conductor')).map(u => (
                   <option key={u.id} value={u.id}>{u.nombre}</option>
                 ))}
               </select>

@@ -41,7 +41,12 @@ export default function NuevoRegistroWizard() {
   const [saved, setSaved] = useState(false);
   const [saving, setSaving] = useState(false);
   const [hydrated, setHydrated] = useState(false);
-  const [catalogs, setCatalogs] = useState<Catalogs | null>(null);
+  const [catalogs, setCatalogs] = useState<Catalogs | null>(() => {
+    if (typeof window !== 'undefined' && (window as any).__CATALOGS__) {
+      return (window as any).__CATALOGS__;
+    }
+    return null;
+  });
 
   useEffect(() => {
     setHydrated(true);

@@ -4,12 +4,36 @@ import AppLayout from '../layouts/AppLayout.astro';
 import StickyHeader from '../components/StickyHeader';
 import BottomNav from '../components/BottomNav';
 import NuevoRegistroWizard from '../components/NuevoRegistroWizard';
+import { query } from '../lib/db';
+
+interface DbVehiculo { id: number; nombre: string; placa: string; activo?: number }
+interface DbSimple { id: number; nombre: string }
+
+let catalogsData = { vehiculos: [], tiposCombustible: [], proveedores: [], subProyectos: [] };
+
+try {
+  const [vehiculos, tiposCombustible, proveedores, subProyectos] = await Promise.all([
+    query<DbVehiculo[]>('SELECT id, nombre, placa FROM vehiculos'),
+    query<DbSimple[]>('SELECT id, nombre FROM tipos_combustible'),
+    query<DbSimple[]>('SELECT id, nombre FROM proveedores'),
+    query<DbSimple[]>('SELECT id, nombre FROM sub_proyectos'),
+  ]);
+  catalogsData = {
+    vehiculos: vehiculos.map((v: DbVehiculo) => ({ id: String(v.id), nombre: v.nombre, placa: v.placa })),
+    tiposCombustible: tiposCombustible.map((t: DbSimple) => ({ id: t.id, nombre: t.nombre })),
+    proveedores: proveedores.map((p: DbSimple) => ({ id: p.id, nombre: p.nombre })),
+    subProyectos: subProyectos.map((s: DbSimple) => ({ id: s.id, nombre: s.nombre })),
+  };
+} catch (e) {
+  console.warn('No se pudieron cargar catálogos en prerender:', e);
+}
 ---
 
 <AppLayout title="Nuevo Registro">
   <fragment slot="header">
     <StickyHeader title="Nuevo Registro" client:load showBack />
   </fragment>
+  <script is:inline define:vars={{ catalogsData }}>window.__CATALOGS__ = catalogsData</script>
   <NuevoRegistroWizard client:load />
   <fragment slot="nav">
     <BottomNav client:load />

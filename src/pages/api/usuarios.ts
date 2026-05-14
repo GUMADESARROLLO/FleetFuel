@@ -1,3 +1,4 @@
+import bcrypt from 'bcryptjs';
 import { query } from '../../lib/db';
 
 export async function GET() {
@@ -36,9 +37,11 @@ export async function POST({ request }: { request: Request }) {
       });
     }
 
+    const hashedPassword = await bcrypt.hash(password, 10);
+
     await query(
       `INSERT INTO usuarios (username, nombre, password, role_id) VALUES (?, ?, ?, ?)`,
-      [username, nombre, password, roleRow.id]
+      [username, nombre, hashedPassword, roleRow.id]
     );
 
     return new Response(JSON.stringify({ success: true }), {
@@ -74,7 +77,11 @@ export async function PUT({ request }: { request: Request }) {
     const params: any[] = [];
 
     if (nombre) { updates.push('nombre = ?'); params.push(nombre); }
-    if (password) { updates.push('password = ?'); params.push(password); }
+    if (password) {
+      const hashedPassword = await bcrypt.hash(password, 10);
+      updates.push('password = ?');
+      params.push(hashedPassword);
+    }
     if (role) {
       const [roleRow] = await query<any[]>('SELECT id FROM roles WHERE nombre = ?', [role]);
       if (!roleRow) {

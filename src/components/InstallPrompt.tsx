@@ -43,7 +43,7 @@ export default function InstallPrompt() {
     <div className="fixed bottom-20 left-4 right-4 z-50 animate-slide-up">
       <div className="bg-surface border border-border rounded-xl p-4 shadow-2xl">
         <div className="flex items-start gap-3 mb-3">
-          <div className="w-10 h-10 rounded-xl bg-accent flex items-center justify-center flex-shrink-0">
+          <div className="w-10 h-10 rounded-xl bg-accent flex items-center justify-center shrink-0">
             <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v-7m0 0l-3 3m3-3l3 3m-9 4v3a2 2 0 002 2h8a2 2 0 002-2v-3" />
             </svg>

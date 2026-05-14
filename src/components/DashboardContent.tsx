@@ -110,7 +110,7 @@ export default function DashboardContent() {
                 href={`/reportes/${r.id}`}
                 className="flex items-center gap-3 bg-surface rounded-xl border border-border p-3 hover:border-accent/30 transition-colors active:scale-[0.99]"
               >
-                <div className="w-10 h-10 rounded-full bg-accent/15 flex items-center justify-center flex-shrink-0">
+                <div className="w-10 h-10 rounded-full bg-accent/15 flex items-center justify-center shrink-0">
                   <svg className="w-5 h-5 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 2C9 7 6 11 6 14a6 6 0 1012 0c0-3-3-7-6-12z" />
                   </svg>
@@ -125,7 +125,7 @@ export default function DashboardContent() {
                     <span className="text-xs font-bold text-accent">{formatCurrency(r.importeTotal || 0)}</span>
                   </div>
                 </div>
-                <svg className="w-4 h-4 text-text-muted flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg className="w-4 h-4 text-text-muted shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                 </svg>
               </a>

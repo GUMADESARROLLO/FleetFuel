@@ -68,6 +68,18 @@ export default defineConfig({
             },
           },
           {
+            urlPattern: /\/api\/(vehiculos|tipos-combustible|proveedores|sub-proyectos)$/,
+            handler: 'StaleWhileRevalidate',
+            options: {
+              cacheName: 'catalog-cache',
+              expiration: {
+                maxEntries: 20,
+                maxAgeSeconds: 7 * 24 * 60 * 60,
+              },
+              cacheableResponse: { statuses: [0, 200] },
+            },
+          },
+          {
             urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
             handler: 'CacheFirst',
             options: {

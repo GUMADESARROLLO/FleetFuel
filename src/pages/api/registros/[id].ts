@@ -1,11 +1,17 @@
 import { query } from '../../../lib/db';
 import type { RegistroCombustible } from '../../../lib/types';
 
-const FIELDS = `id, user_id, fecha_creacion, foto_odometro_antes, foto_odometro_despues,
-  foto_factura, foto_voucher, vehiculo_id, vehiculo_nombre, vehiculo_placa,
-  tipo_combustible, proveedor, sub_proyecto, kilometraje, fecha_factura,
-  numero_factura, numero_voucher, gravadas, isr, excedentes, litros,
-  importe_total, ruta_recorrida, sincronizado`;
+const FIELDS = `r.id, r.user_id, r.fecha_creacion, r.foto_odometro_antes, r.foto_odometro_despues,
+  r.foto_factura, r.foto_voucher, r.vehiculo_id, r.vehiculo_nombre, r.vehiculo_placa,
+  tc.nombre AS tipo_combustible, p.nombre AS proveedor, sp.nombre AS sub_proyecto,
+  r.kilometraje, r.fecha_factura,
+  r.numero_factura, r.numero_voucher, r.gravadas, r.isr, r.excedentes, r.litros,
+  r.importe_total, r.ruta_recorrida, r.sincronizado`;
+
+const JOINS = `FROM registros_combustible r
+  LEFT JOIN tipos_combustible tc ON r.tipo_combustible_id = tc.id
+  LEFT JOIN proveedores p ON r.proveedor_id = p.id
+  LEFT JOIN sub_proyectos sp ON r.sub_proyecto_id = sp.id`;
 
 function mapRow(r: any): RegistroCombustible {
   return {
@@ -38,7 +44,7 @@ function mapRow(r: any): RegistroCombustible {
 
 export async function GET({ params }: { params: { id: string } }) {
   try {
-    const rows = await query<any[]>(`SELECT ${FIELDS} FROM registros_combustible WHERE id = ?`, [params.id]);
+    const rows = await query<any[]>(`SELECT ${FIELDS} ${JOINS} WHERE r.id = ?`, [params.id]);
     if (rows.length === 0) {
       return new Response(JSON.stringify({ error: 'Not found' }), {
         status: 404,

@@ -123,7 +123,7 @@ export default function ReportesList() {
       {filtered.length === 0 ? (
         <div className="text-center py-16">
           <svg className="w-24 h-24 text-surface-2 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={0.5} d="M13 10V3L4 14h7v7l9-11h-7z" />
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={0.5} d="M12 2C9 7 6 11 6 14a6 6 0 1012 0c0-3-3-7-6-12z" />
           </svg>
           <p className="text-text-muted font-medium">No hay registros en este período</p>
           <p className="text-sm text-text-muted mt-1">Seleccioná otro rango de fechas</p>

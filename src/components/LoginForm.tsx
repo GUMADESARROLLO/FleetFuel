@@ -54,7 +54,7 @@ export default function LoginForm() {
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-accent mb-4">
             <svg className="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 2C9 7 6 11 6 14a6 6 0 1012 0c0-3-3-7-6-12z" />
             </svg>
           </div>
           <h1 className="font-display font-bold text-3xl text-text">
@@ -144,7 +144,7 @@ export default function LoginForm() {
         </form>
 
         <p className="text-center text-xs text-text-muted mt-6">
-          FleetFuel v1.0 &mdash; Control total de tu flota
+          FleetFuel v1.1.1 &mdash; Control total de tu flota
         </p>
       </div>
     </div>

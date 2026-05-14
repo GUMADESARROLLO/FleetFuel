@@ -41,15 +41,25 @@ export default function ReporteDetalle({ id }: { id: string }) {
 
   return (
     <div className="px-4 py-4 max-w-lg mx-auto">
-      <a
-        href={backUrl}
-        className="inline-flex items-center gap-1.5 text-sm text-accent font-medium hover:underline mb-4 touch-target"
-      >
-        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-        </svg>
-        Retroceder
-      </a>
+      <div className="flex items-center justify-between mb-4">
+        <a
+          href={backUrl}
+          className="inline-flex items-center gap-1.5 text-sm text-accent font-medium hover:underline touch-target"
+        >
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+          </svg>
+          Retroceder
+        </a>
+        <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium ${
+          registro.sincronizado
+            ? 'bg-success/15 text-success'
+            : 'bg-accent/15 text-accent'
+        }`}>
+          <span className={`w-1.5 h-1.5 rounded-full ${registro.sincronizado ? 'bg-success' : 'bg-accent'}`} />
+          {registro.sincronizado ? 'Sincronizado' : 'Pendiente'}
+        </span>
+      </div>
 
       <div className="grid grid-cols-2 gap-2 mb-6">
         {photos.map((photo, i) => (
@@ -147,17 +157,6 @@ export default function ReporteDetalle({ id }: { id: string }) {
           </div>
         </div>
       )}
-
-      <div className="flex items-center gap-2 mb-6">
-        <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium ${
-          registro.sincronizado
-            ? 'bg-success/15 text-success'
-            : 'bg-accent/15 text-accent'
-        }`}>
-          <span className={`w-1.5 h-1.5 rounded-full ${registro.sincronizado ? 'bg-success' : 'bg-accent'}`} />
-          {registro.sincronizado ? 'Sincronizado' : 'Pendiente de sincronización'}
-        </span>
-      </div>
 
       {lightboxImg && (
         <div

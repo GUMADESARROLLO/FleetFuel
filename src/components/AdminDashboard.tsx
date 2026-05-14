@@ -73,12 +73,11 @@ export default function AdminDashboard() {
     const totalRegistros = filtered.length;
     const totalLitros = filtered.reduce((s, r) => s + (r.litros || 0), 0);
     const totalImporte = filtered.reduce((s, r) => s + (r.importeTotal || 0), 0);
-    const conductores = new Set(filtered.map(r => r.userId));
-    return { totalRegistros, totalLitros, totalImporte, conductores: conductores.size };
+    return { totalRegistros, totalLitros, totalImporte, conductores: usuarios.filter(u => u.role.toLowerCase().includes('conductor')).length };
   }, [filtered]);
 
   const porConductor = useMemo(() => {
-    const map = new Map<string, { nombre: string; registros: number; litros: number; importe: number }>();
+    const map = new Map<number, { nombre: string; registros: number; litros: number; importe: number }>();
     filtered.forEach(r => {
       const u = usuarios.find(u => u.id === r.userId);
       const nombre = u?.nombre || String(r.userId);

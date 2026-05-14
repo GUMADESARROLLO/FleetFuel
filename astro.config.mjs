@@ -52,7 +52,7 @@ export default defineConfig({
       workbox: {
         globPatterns: ['**/*.{js,css,html,svg,png,woff2,woff,ttf}'],
         navigateFallback: '/offline',
-        navigateFallbackDenylist: [/\/api\//, /\/_astro\//],
+        navigateFallbackDenylist: [/\/api\//, /\/_astro\//, /\/reportes\//],
         runtimeCaching: [
           {
             urlPattern: /^\/(?!api\/|_astro\/)[^.]*$/,

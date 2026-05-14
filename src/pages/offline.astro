@@ -265,7 +265,26 @@ import '../styles/global.css';
           existing.classList.remove('hidden');
         }
 
+        async function isReallyOnline() {
+          try {
+            const controller = new AbortController();
+            const id = setTimeout(() => controller.abort(), 3000);
+            await fetch('/api/ping?_=' + Date.now(), {
+              signal: controller.signal,
+              cache: 'no-store',
+            });
+            clearTimeout(id);
+            return true;
+          } catch {
+            return false;
+          }
+        }
+
         async function init() {
+          if (navigator.onLine || (await isReallyOnline())) {
+            window.location.href = '/reportes';
+            return;
+          }
           const pending = getPendingIds();
           const pendingEl = document.getElementById('pending-sync');
           const pendingCount = document.getElementById('pending-count');

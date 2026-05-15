@@ -144,7 +144,7 @@ export default function LoginForm() {
         </form>
 
         <p className="text-center text-xs text-text-muted mt-6">
-          FleetFuel v1.1.1 &mdash; Control total de tu flota
+          FleetFuel v1.2.0 &mdash; Control total de tu flota
         </p>
       </div>
     </div>

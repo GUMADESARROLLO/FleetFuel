@@ -267,7 +267,7 @@ export default function AdminDashboard() {
 
         <div className="bg-surface rounded-xl border border-border p-4 mb-6">
           <div className="grid grid-cols-12 gap-3 items-end">
-            <div className="col-span-6 sm:col-span-3">
+            <div className="col-span-6 sm:col-span-6">
               <label className="block text-xs font-medium text-text-muted mb-1">Rango de Fechas</label>
               <input
                 ref={inputRef}
@@ -277,7 +277,7 @@ export default function AdminDashboard() {
                 readOnly
               />
             </div>
-            <div className="col-span-6 sm:col-span-3">
+            <div className="col-span-6 sm:col-span-2">
               <label className="block text-xs font-medium text-text-muted mb-1">Conductor</label>
               <select
                 value={filtroConductor}
@@ -290,7 +290,7 @@ export default function AdminDashboard() {
                 ))}
               </select>
             </div>
-            <div className="col-span-6 sm:col-span-3">
+            <div className="col-span-6 sm:col-span-2">
               <label className="block text-xs font-medium text-text-muted mb-1">Unidad de Negocio</label>
               <select
                 value={filtroUnidadNegocio}
@@ -303,7 +303,7 @@ export default function AdminDashboard() {
                 ))}
               </select>
             </div>
-            <div className="col-span-6 sm:col-span-3 flex items-end">
+            <div className="col-span-6 sm:col-span-2 flex items-end">
               <button
                 onClick={() => {
                   setAppliedDateDesde(dateDesde);

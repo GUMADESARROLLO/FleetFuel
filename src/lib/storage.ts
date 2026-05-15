@@ -251,6 +251,13 @@ export function formatCurrency(value: number): string {
   }).format(value);
 }
 
+export function formatLitros(value: number): string {
+  return new Intl.NumberFormat('es-NI', {
+    minimumFractionDigits: 1,
+    maximumFractionDigits: 1,
+  }).format(value) + ' L';
+}
+
 export function formatDate(dateStr: string): string {
   const d = new Date(dateStr);
   return d.toLocaleDateString('es-MX', {

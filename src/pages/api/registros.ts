@@ -6,19 +6,22 @@ const FIELDS = `r.id, r.user_id, r.fecha_creacion, r.foto_odometro_antes, r.foto
   tc.nombre AS tipo_combustible, p.nombre AS proveedor, sp.nombre AS sub_proyecto,
   r.kilometraje, r.fecha_factura,
   r.numero_factura, r.numero_voucher, r.gravadas, r.isr, r.excedentes, r.litros,
-  r.importe_total, r.ruta_recorrida, r.sincronizado, u.nombre AS conductor_nombre`;
+  r.importe_total, r.ruta_recorrida, r.sincronizado, u.nombre AS conductor_nombre,
+  un.nombre AS unidad_negocio_nombre`;
 
 const JOINS = `FROM registros_combustible r
   LEFT JOIN tipos_combustible tc ON r.tipo_combustible_id = tc.id
   LEFT JOIN proveedores p ON r.proveedor_id = p.id
   LEFT JOIN sub_proyectos sp ON r.sub_proyecto_id = sp.id
-  LEFT JOIN usuarios u ON r.user_id = u.id`;
+  LEFT JOIN usuarios u ON r.user_id = u.id
+  LEFT JOIN unidades_negocio un ON u.unidad_negocio_id = un.id`;
 
 function mapRow(r: any): RegistroCombustible {
   return {
     id: r.id,
     userId: r.user_id,
     conductorNombre: r.conductor_nombre,
+    unidadNegocioNombre: r.unidad_negocio_nombre || null,
     fechaCreacion: r.fecha_creacion instanceof Date ? r.fecha_creacion.toISOString() : r.fecha_creacion,
     fotoOdometroAntes: r.foto_odometro_antes,
     fotoOdometroDespues: r.foto_odometro_despues,

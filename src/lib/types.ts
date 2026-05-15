@@ -54,6 +54,7 @@ export interface RegistroCombustible {
   id: string;
   userId: number;
   conductorNombre?: string;
+  unidadNegocioNombre?: string;
   fechaCreacion: string;
   fotoOdometroAntes: string;
   fotoOdometroDespues: string;

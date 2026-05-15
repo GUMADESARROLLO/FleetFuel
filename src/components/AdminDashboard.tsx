@@ -3,7 +3,7 @@ import $ from 'jquery';
 import { es } from 'date-fns/locale';
 import { format } from 'date-fns';
 import { getSession, requireAuth, isAdmin, logout } from '../lib/auth';
-import { formatCurrency } from '../lib/storage';
+import { formatCurrency, formatLitros } from '../lib/storage';
 import { apiGetRegistros, apiGetUsuarios, apiGetUnidadesNegocio } from '../lib/api';
 import type { RegistroCombustible, Session, Usuario, UnidadNegocio } from '../lib/types';
 import DataTable from './DataTable';
@@ -157,11 +157,12 @@ export default function AdminDashboard() {
   }, [filtered]);
 
   const porConductor = useMemo(() => {
-    const map = new Map<number, { nombre: string; registros: number; litros: number; importe: number }>();
+    const map = new Map<number, { nombre: string; unidadNegocioNombre: string; registros: number; litros: number; importe: number }>();
     filtered.forEach(r => {
       const u = usuarios.find(u => u.id === r.userId);
       const nombre = u?.nombre || String(r.userId);
-      const existing = map.get(r.userId) || { nombre, registros: 0, litros: 0, importe: 0 };
+      const unNombre = u?.unidadNegocioNombre || '';
+      const existing = map.get(r.userId) || { nombre, unidadNegocioNombre: unNombre, registros: 0, litros: 0, importe: 0 };
       existing.registros++;
       existing.litros += r.litros || 0;
       existing.importe += r.importeTotal || 0;
@@ -373,7 +374,7 @@ export default function AdminDashboard() {
                         <tr key={u.nombre} className="border-b border-border/50 last:border-0">
                           <td className="py-2 pr-4 text-text font-medium">{u.nombre}</td>
                           <td className="py-2 px-4 text-right text-text">{u.registros}</td>
-                          <td className="py-2 px-4 text-right text-text">{u.litros.toFixed(1)} L</td>
+                          <td className="py-2 px-4 text-right text-text whitespace-nowrap">{formatLitros(u.litros)}</td>
                           <td className="py-2 pl-4 text-right text-accent font-bold">{formatCurrency(u.importe)}</td>
                         </tr>
                       ))}
@@ -391,6 +392,7 @@ export default function AdminDashboard() {
                     <thead>
                       <tr className="border-b border-border">
                         <th className="text-left py-2 pr-4 text-text-muted font-medium">Conductor</th>
+                        <th className="text-left py-2 px-4 text-text-muted font-medium">Unidad de Negocio</th>
                         <th className="text-right py-2 px-4 text-text-muted font-medium">Registros</th>
                         <th className="text-right py-2 px-4 text-text-muted font-medium">Litros</th>
                         <th className="text-right py-2 pl-4 text-text-muted font-medium">Importe</th>
@@ -400,9 +402,10 @@ export default function AdminDashboard() {
                       {porConductor.map(c => (
                         <tr key={c.nombre} className="border-b border-border/50 last:border-0">
                           <td className="py-2 pr-4 text-text font-medium">{c.nombre}</td>
+                          <td className="py-2 px-4 text-text">{c.unidadNegocioNombre || '—'}</td>
                           <td className="py-2 px-4 text-right text-text">{c.registros}</td>
-                          <td className="py-2 px-4 text-right text-text">{c.litros.toFixed(1)} L</td>
-                          <td className="py-2 pl-4 text-right text-accent font-bold">{formatCurrency(c.importe)}</td>
+                          <td className="py-2 px-4 text-right text-text whitespace-nowrap">{formatLitros(c.litros)}</td>
+                          <td className="py-2 pl-4 text-right text-accent font-bold whitespace-nowrap">{formatCurrency(c.importe)}</td>
                         </tr>
                       ))}
                     </tbody>

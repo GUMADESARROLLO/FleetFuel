@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { apiGetRegistrosPaginated } from '../lib/api';
-import { formatCurrency, formatDate } from '../lib/storage';
+import { formatCurrency, formatLitros, formatDate } from '../lib/storage';
 import type { RegistroCombustible } from '../lib/types';
 import PendingAlert from './PendingAlert';
 
@@ -157,6 +157,7 @@ export default function DataTable({ dateDesde, dateHasta, filtroConductor, filtr
                   Fecha {sortIcon('fecha_creacion')}
                 </th>
                 <th className="text-left py-3 px-4 text-text-muted font-medium whitespace-nowrap">Conductor</th>
+                <th className="text-left py-3 px-4 text-text-muted font-medium whitespace-nowrap">Unidad de Negocio</th>
                 <th
                   className="text-left py-3 px-4 text-text-muted font-medium whitespace-nowrap cursor-pointer select-none hover:text-text transition-colors"
                   onClick={() => handleSort('vehiculo_nombre')}
@@ -182,7 +183,7 @@ export default function DataTable({ dateDesde, dateHasta, filtroConductor, filtr
             <tbody>
               {loading && data.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="py-12 text-center">
+                  <td colSpan={8} className="py-12 text-center">
                     <svg className="w-6 h-6 text-accent animate-spin mx-auto" fill="none" viewBox="0 0 24 24">
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
@@ -194,8 +195,9 @@ export default function DataTable({ dateDesde, dateHasta, filtroConductor, filtr
                   <tr key={r.id} className="border-b border-border/50 hover:bg-bg/30 transition-colors">
                     <td className="py-3 px-4 text-text whitespace-nowrap">{formatDate(r.fechaCreacion)}</td>
                     <td className="py-3 px-4 text-text">{r.conductorNombre || String(r.userId)}</td>
+                    <td className="py-3 px-4 text-text">{r.unidadNegocioNombre || '—'}</td>
                     <td className="py-3 px-4 text-text">{r.vehiculoNombre}</td>
-                    <td className="py-3 px-4 text-right text-text whitespace-nowrap">{r.litros?.toFixed(1) || '0'} L</td>
+                    <td className="py-3 px-4 text-right text-text whitespace-nowrap">{formatLitros(r.litros || 0)}</td>
                     <td className="py-3 px-4 text-right text-accent font-bold whitespace-nowrap">{formatCurrency(r.importeTotal || 0)}</td>
                     <td className="py-3 px-4 text-center">
                       <span className={`inline-flex items-center justify-center w-7 h-7 rounded-full ${

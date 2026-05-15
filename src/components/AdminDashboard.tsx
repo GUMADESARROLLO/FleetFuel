@@ -267,7 +267,7 @@ export default function AdminDashboard() {
 
         <div className="bg-surface rounded-xl border border-border p-4 mb-6">
           <div className="grid grid-cols-12 gap-3 items-end">
-            <div className="col-span-12 sm:col-span-5">
+            <div className="col-span-6 sm:col-span-3">
               <label className="block text-xs font-medium text-text-muted mb-1">Rango de Fechas</label>
               <input
                 ref={inputRef}
@@ -303,7 +303,7 @@ export default function AdminDashboard() {
                 ))}
               </select>
             </div>
-            <div className="col-span-12 sm:col-span-1 flex items-end justify-end">
+            <div className="col-span-6 sm:col-span-3 flex items-end">
               <button
                 onClick={() => {
                   setAppliedDateDesde(dateDesde);
@@ -319,12 +319,12 @@ export default function AdminDashboard() {
                     setLoading(false);
                   });
                 }}
-                className="h-10 px-3 text-sm text-text-muted hover:text-text border border-border rounded-lg hover:bg-surface transition-colors touch-target whitespace-nowrap flex items-center gap-1"
+                className="w-full h-10 px-3 text-sm text-text-muted hover:text-text border border-border rounded-lg hover:bg-surface transition-colors touch-target whitespace-nowrap flex items-center justify-center gap-1"
               >
                 <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                 </svg>
-                <span className="hidden sm:inline">Actualizar</span>
+                Actualizar
               </button>
             </div>
           </div>

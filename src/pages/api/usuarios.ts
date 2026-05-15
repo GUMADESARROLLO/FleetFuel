@@ -6,7 +6,15 @@ export async function GET() {
     const rows = await query<any[]>(
       'SELECT u.id, u.username, u.nombre, r.nombre AS role, u.unidad_negocio_id, un.nombre AS unidad_negocio_nombre FROM usuarios u JOIN roles r ON u.role_id = r.id LEFT JOIN unidades_negocio un ON u.unidad_negocio_id = un.id ORDER BY r.nombre, u.nombre'
     );
-    return new Response(JSON.stringify({ data: rows }), {
+    const data = rows.map((r: any) => ({
+      id: r.id,
+      username: r.username,
+      nombre: r.nombre,
+      role: r.role,
+      unidadNegocioId: r.unidad_negocio_id || null,
+      unidadNegocioNombre: r.unidad_negocio_nombre || null,
+    }));
+    return new Response(JSON.stringify({ data }), {
       status: 200,
       headers: { 'Content-Type': 'application/json' },
     });

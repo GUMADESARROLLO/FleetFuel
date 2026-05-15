@@ -10,6 +10,7 @@ export default function ReporteDetalle({ id: _id }: { id: string }) {
     ? window.location.pathname.replace(/^\/reportes\//, '')
     : _id;
   const [registro, setRegistro] = useState<RegistroCombustible | null>(null);
+  const [pendingSync, setPendingSync] = useState(false);
   const [lightboxImg, setLightboxImg] = useState<string | null>(null);
   const [backUrl, setBackUrl] = useState('/reportes');
 
@@ -20,9 +21,37 @@ export default function ReporteDetalle({ id: _id }: { id: string }) {
     setBackUrl(isAdmin() ? '/admin/dashboard' : '/reportes');
     (async () => {
       const r = await getRegistroById(session.id, id);
+      if (r && !r.sincronizado) {
+        setPendingSync(true);
+      }
       setRegistro(r || null);
     })();
   }, [id]);
+
+  if (registro && pendingSync) {
+    return (
+      <div className="px-4 py-16 text-center max-w-lg mx-auto">
+        <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-accent/15 mb-6">
+          <svg className="w-10 h-10 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        </div>
+        <h2 className="font-display font-bold text-xl text-text mb-3">Registro pendiente de sincronización</h2>
+        <p className="text-sm text-text-muted leading-relaxed mb-8 max-w-sm mx-auto">
+          Este registro se guardó en modo offline y estará disponible para consultar una vez que se sincronice automáticamente con el servidor.
+        </p>
+        <a
+          href={backUrl}
+          className="inline-flex items-center gap-2 h-11 px-6 bg-accent hover:bg-accent/90 text-white font-bold rounded-xl transition-colors text-sm"
+        >
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+          </svg>
+          Volver
+        </a>
+      </div>
+    );
+  }
 
   if (!registro) {
     return (

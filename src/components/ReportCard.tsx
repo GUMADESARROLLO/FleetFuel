@@ -1,17 +1,33 @@
+import { useState } from 'react';
 import type { RegistroCombustible } from '../lib/types';
 import { formatCurrency, formatDate } from '../lib/storage';
 import { getImageUrl } from '../lib/imageUrl';
+import PendingAlert from './PendingAlert';
 
 interface ReportCardProps {
   registro: RegistroCombustible;
 }
 
 export default function ReportCard({ registro }: ReportCardProps) {
+  const [showAlert, setShowAlert] = useState(false);
+
+  const handleClick = () => {
+    if (!registro.sincronizado) {
+      setShowAlert(true);
+    } else {
+      window.location.href = `/reportes/${registro.id}`;
+    }
+  };
+
   return (
-    <a
-      href={`/reportes/${registro.id}`}
-      className="block bg-surface rounded-xl border border-border p-4 hover:border-accent/30 transition-colors active:scale-[0.99]"
-    >
+    <>
+      <div
+        onClick={handleClick}
+        onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') handleClick(); }}
+        role="button"
+        tabIndex={0}
+        className="block bg-surface rounded-xl border border-border p-4 hover:border-accent/30 transition-colors active:scale-[0.99] cursor-pointer"
+      >
       <div className="flex items-start justify-between mb-3">
         <div className="flex items-center gap-2">
           <span className="px-2 py-0.5 bg-accent/15 text-accent text-[10px] font-bold rounded-md uppercase tracking-wider">
@@ -74,6 +90,9 @@ export default function ReportCard({ registro }: ReportCardProps) {
           )}
         </div>
       </div>
-    </a>
+    </div>
+
+      <PendingAlert registro={showAlert ? registro : null} onClose={() => setShowAlert(false)} />
+    </>
   );
 }

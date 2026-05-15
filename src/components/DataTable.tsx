@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { apiGetRegistrosPaginated } from '../lib/api';
 import { formatCurrency, formatDate } from '../lib/storage';
 import type { RegistroCombustible } from '../lib/types';
+import PendingAlert from './PendingAlert';
 
 const PAGE_SIZES = [10, 25, 50, 100];
 
@@ -26,6 +27,7 @@ export default function DataTable({ dateDesde, dateHasta, filtroConductor }: Pro
   const [sort, setSort] = useState<SortState>({ column: 'fecha_creacion', dir: 'desc' });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [alertRegistro, setAlertRegistro] = useState<RegistroCombustible | null>(null);
   const searchTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
@@ -103,6 +105,7 @@ export default function DataTable({ dateDesde, dateHasta, filtroConductor }: Pro
   const to = Math.min(page * pageSize, total);
 
   return (
+    <>
     <div className="bg-surface rounded-xl border border-border overflow-hidden">
       <div className="p-4 border-b border-border flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <h2 className="text-sm font-bold text-text uppercase tracking-wider">
@@ -208,15 +211,27 @@ export default function DataTable({ dateDesde, dateHasta, filtroConductor }: Pro
                       </span>
                     </td>
                     <td className="py-3 px-4">
-                      <a
-                        href={`/reportes/${r.id}`}
-                        className="text-accent hover:underline text-xs font-medium touch-target inline-flex items-center gap-1"
-                      >
-                        Ver
-                        <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-                        </svg>
-                      </a>
+                      {r.sincronizado ? (
+                        <a
+                          href={`/reportes/${r.id}`}
+                          className="text-accent hover:underline text-xs font-medium touch-target inline-flex items-center gap-1"
+                        >
+                          Ver
+                          <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                          </svg>
+                        </a>
+                      ) : (
+                        <button
+                          onClick={() => setAlertRegistro(r)}
+                          className="text-accent hover:underline text-xs font-medium touch-target inline-flex items-center gap-1 cursor-pointer"
+                        >
+                          Ver
+                          <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                          </svg>
+                        </button>
+                      )}
                     </td>
                   </tr>
                 ))
@@ -303,5 +318,8 @@ export default function DataTable({ dateDesde, dateHasta, filtroConductor }: Pro
         </div>
       )}
     </div>
+
+      <PendingAlert registro={alertRegistro} onClose={() => setAlertRegistro(null)} />
+    </>
   );
 }

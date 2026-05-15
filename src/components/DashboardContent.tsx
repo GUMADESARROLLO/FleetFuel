@@ -10,9 +10,11 @@ import {
   formatDate,
 } from '../lib/storage';
 import SummaryCard from './SummaryCard';
+import PendingAlert from './PendingAlert';
 
 export default function DashboardContent() {
   const [session, setSession] = useState<any>(null);
+  const [alertRegistro, setAlertRegistro] = useState<any>(null);
   const [totalRegistros, setTotalRegistros] = useState(0);
   const [totalLitros, setTotalLitros] = useState(0);
   const [totalImporte, setTotalImporte] = useState(0);
@@ -39,6 +41,7 @@ export default function DashboardContent() {
   if (!session) return null;
 
   return (
+    <>
     <div className="px-4 py-4 max-w-lg mx-auto">
       <div className="mb-6 mt-2">
         <div className="flex items-center gap-2 mb-1">
@@ -104,10 +107,18 @@ export default function DashboardContent() {
           </div>
         ) : (
           <div className="space-y-2">
-            {ultimosRegistros.map((r) => (
+            {ultimosRegistros.map((r) => {
+              const handleClick = (e: React.MouseEvent) => {
+                if (!r.sincronizado) {
+                  e.preventDefault();
+                  setAlertRegistro(r);
+                }
+              };
+              return (
               <a
                 key={r.id}
                 href={`/reportes/${r.id}`}
+                onClick={handleClick}
                 className="flex items-center gap-3 bg-surface rounded-xl border border-border p-3 hover:border-accent/30 transition-colors active:scale-[0.99]"
               >
                 <div className="w-10 h-10 rounded-full bg-accent/15 flex items-center justify-center shrink-0">
@@ -139,10 +150,13 @@ export default function DashboardContent() {
                   )}
                 </span>
               </a>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>
+
+      <PendingAlert registro={alertRegistro} onClose={() => setAlertRegistro(null)} />
 
       <a
         href="/nuevo-registro"
@@ -153,5 +167,6 @@ export default function DashboardContent() {
         </svg>
       </a>
     </div>
+    </>
   );
 }

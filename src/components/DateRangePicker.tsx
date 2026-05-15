@@ -42,6 +42,7 @@ export default function DateRangePicker({
             placeholderText="Fecha inicial"
             className={inputClassName}
             wrapperClassName="w-full"
+            onKeyDown={e => e.preventDefault()}
           />
         </div>
         <div className="flex-1">
@@ -60,6 +61,7 @@ export default function DateRangePicker({
             placeholderText="Fecha final"
             className={inputClassName}
             wrapperClassName="w-full"
+            onKeyDown={e => e.preventDefault()}
           />
         </div>
       </div>

@@ -171,7 +171,7 @@ export default function AdminDashboard() {
             <svg className="w-6 h-6 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 2C9 7 6 11 6 14a6 6 0 1012 0c0-3-3-7-6-12z" />
             </svg>
-            <span className="font-display font-bold text-lg text-text">Admin FleetFuel</span>
+            <a href="/admin/dashboard" className="font-display font-bold text-lg text-text hover:text-accent transition-colors">Admin FleetFuel</a>
           </div>
           <div className="relative" ref={dropdownRef}>
             <button

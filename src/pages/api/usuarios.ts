@@ -4,7 +4,7 @@ import { query } from '../../lib/db';
 export async function GET() {
   try {
     const rows = await query<any[]>(
-      'SELECT u.id, u.username, u.nombre, r.nombre AS role FROM usuarios u JOIN roles r ON u.role_id = r.id ORDER BY r.nombre, u.nombre'
+      'SELECT u.id, u.username, u.nombre, r.nombre AS role, u.unidad_negocio_id, un.nombre AS unidad_negocio_nombre FROM usuarios u JOIN roles r ON u.role_id = r.id LEFT JOIN unidades_negocio un ON u.unidad_negocio_id = un.id ORDER BY r.nombre, u.nombre'
     );
     return new Response(JSON.stringify({ data: rows }), {
       status: 200,
@@ -20,7 +20,7 @@ export async function GET() {
 
 export async function POST({ request }: { request: Request }) {
   try {
-    const { username, nombre, password, role } = await request.json();
+    const { username, nombre, password, role, unidadNegocioId } = await request.json();
 
     if (!username || !nombre || !password || !role) {
       return new Response(JSON.stringify({ error: 'Todos los campos son requeridos' }), {
@@ -40,8 +40,8 @@ export async function POST({ request }: { request: Request }) {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     await query(
-      `INSERT INTO usuarios (username, nombre, password, role_id) VALUES (?, ?, ?, ?)`,
-      [username, nombre, hashedPassword, roleRow.id]
+      `INSERT INTO usuarios (username, nombre, password, role_id, unidad_negocio_id) VALUES (?, ?, ?, ?, ?)`,
+      [username, nombre, hashedPassword, roleRow.id, unidadNegocioId || null]
     );
 
     return new Response(JSON.stringify({ success: true }), {
@@ -64,7 +64,7 @@ export async function POST({ request }: { request: Request }) {
 
 export async function PUT({ request }: { request: Request }) {
   try {
-    const { username, nombre, password, role } = await request.json();
+    const { username, nombre, password, role, unidadNegocioId } = await request.json();
 
     if (!username) {
       return new Response(JSON.stringify({ error: 'Username requerido' }), {
@@ -92,6 +92,10 @@ export async function PUT({ request }: { request: Request }) {
       }
       updates.push('role_id = ?');
       params.push(roleRow.id);
+    }
+    if (unidadNegocioId !== undefined) {
+      updates.push('unidad_negocio_id = ?');
+      params.push(unidadNegocioId || null);
     }
 
     if (updates.length === 0) {

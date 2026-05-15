@@ -154,7 +154,22 @@ export default function AdminDashboard() {
       map.set(r.userId, existing);
     });
     return Array.from(map.values());
-  }, [filtered]);
+  }, [filtered, usuarios]);
+
+  const porUnidad = useMemo(() => {
+    const map = new Map<string, { nombre: string; registros: number; litros: number; importe: number }>();
+    filtered.forEach(r => {
+      const u = usuarios.find(u => u.id === r.userId);
+      const unId = String(u?.unidadNegocioId || '0');
+      const unNombre = u?.unidadNegocioNombre || 'Sin unidad';
+      const existing = map.get(unId) || { nombre: unNombre, registros: 0, litros: 0, importe: 0 };
+      existing.registros++;
+      existing.litros += r.litros || 0;
+      existing.importe += r.importeTotal || 0;
+      map.set(unId, existing);
+    });
+    return Array.from(map.values());
+  }, [filtered, usuarios]);
 
   const handleLogout = () => {
     logout();
@@ -319,6 +334,34 @@ export default function AdminDashboard() {
                 <p className="text-2xl font-bold font-display text-text">{metrics.conductores}</p>
               </div>
             </div>
+
+            {porUnidad.length > 0 && (
+              <div className="bg-surface rounded-xl border border-border p-4 mb-6">
+                <h2 className="text-sm font-bold text-text mb-3 uppercase tracking-wider">Gasto por Unidad de Negocio</h2>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b border-border">
+                        <th className="text-left py-2 pr-4 text-text-muted font-medium">Unidad</th>
+                        <th className="text-right py-2 px-4 text-text-muted font-medium">Registros</th>
+                        <th className="text-right py-2 px-4 text-text-muted font-medium">Litros</th>
+                        <th className="text-right py-2 pl-4 text-text-muted font-medium">Importe</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {porUnidad.map(u => (
+                        <tr key={u.nombre} className="border-b border-border/50 last:border-0">
+                          <td className="py-2 pr-4 text-text font-medium">{u.nombre}</td>
+                          <td className="py-2 px-4 text-right text-text">{u.registros}</td>
+                          <td className="py-2 px-4 text-right text-text">{u.litros.toFixed(1)} L</td>
+                          <td className="py-2 pl-4 text-right text-accent font-bold">{formatCurrency(u.importe)}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
 
             {porConductor.length > 0 && (
               <div className="bg-surface rounded-xl border border-border p-4 mb-6">

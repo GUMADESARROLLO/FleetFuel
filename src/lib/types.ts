@@ -3,12 +3,20 @@ export interface User {
   nombre: string;
 }
 
+export interface UnidadNegocio {
+  id: number;
+  nombre: string;
+  activo?: number;
+}
+
 export interface Usuario {
   id: number;
   username: string;
   nombre: string;
   password?: string;
   role: 'admin' | 'conductor';
+  unidadNegocioId?: number | null;
+  unidadNegocioNombre?: string;
 }
 
 export interface Session {
@@ -16,6 +24,7 @@ export interface Session {
   username: string;
   nombre: string;
   role: 'admin' | 'conductor';
+  unidadNegocioId?: number | null;
   loggedInAt: string;
 }
 

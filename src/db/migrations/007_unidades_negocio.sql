@@ -1,0 +1,12 @@
+CREATE TABLE IF NOT EXISTS unidades_negocio (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  nombre VARCHAR(100) NOT NULL UNIQUE,
+  activo TINYINT(1) NOT NULL DEFAULT 1,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+INSERT IGNORE INTO unidades_negocio (nombre) VALUES ('General');
+
+ALTER TABLE usuarios
+  ADD COLUMN unidad_negocio_id INT DEFAULT NULL AFTER role_id,
+  ADD FOREIGN KEY (unidad_negocio_id) REFERENCES unidades_negocio(id) ON DELETE SET NULL;

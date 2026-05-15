@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from 'react';
 import { getSession, requireAuth, isAdmin, logout } from '../lib/auth';
-import { apiGetUsuarios, apiGetRoles, apiCreateUsuario, apiUpdateUsuario, apiDeleteUsuario } from '../lib/api';
-import type { Usuario, Session } from '../lib/types';
+import { apiGetUsuarios, apiGetRoles, apiCreateUsuario, apiUpdateUsuario, apiDeleteUsuario, apiGetUnidadesNegocio } from '../lib/api';
+import type { Usuario, Session, UnidadNegocio } from '../lib/types';
 
 export default function AdminUsers() {
   const [session, setSession] = useState<Session | null>(null);
@@ -9,10 +9,11 @@ export default function AdminUsers() {
   const dropdownRef = useRef<HTMLDivElement>(null);
   const [usuarios, setUsuarios] = useState<Usuario[]>([]);
   const [roles, setRoles] = useState<{ id: number; nombre: string }[]>([]);
+  const [unidadesNegocio, setUnidadesNegocio] = useState<UnidadNegocio[]>([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [editing, setEditing] = useState<Usuario | null>(null);
-  const [form, setForm] = useState({ username: '', nombre: '', password: '', role: '' });
+  const [form, setForm] = useState({ username: '', nombre: '', password: '', role: '', unidadNegocioId: '' });
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
 
@@ -44,12 +45,14 @@ export default function AdminUsers() {
 
   async function loadData() {
     try {
-      const [usuariosData, rolesData] = await Promise.all([
+      const [usuariosData, rolesData, unData] = await Promise.all([
         apiGetUsuarios(),
         apiGetRoles(),
+        apiGetUnidadesNegocio(),
       ]);
       setUsuarios(usuariosData);
       setRoles(rolesData);
+      setUnidadesNegocio(unData);
     } catch (err: any) {
       console.error('Error loading data:', err);
     }
@@ -58,14 +61,14 @@ export default function AdminUsers() {
 
   function openCreate() {
     setEditing(null);
-    setForm({ username: '', nombre: '', password: '', role: roles[0]?.nombre || '' });
+    setForm({ username: '', nombre: '', password: '', role: roles[0]?.nombre || '', unidadNegocioId: '' });
     setError('');
     setShowModal(true);
   }
 
   function openEdit(u: Usuario) {
     setEditing(u);
-    setForm({ username: u.username, nombre: u.nombre, password: '', role: u.role });
+    setForm({ username: u.username, nombre: u.nombre, password: '', role: u.role, unidadNegocioId: String(u.unidadNegocioId || '') });
     setError('');
     setShowModal(true);
   }
@@ -77,11 +80,11 @@ export default function AdminUsers() {
 
     try {
       if (editing) {
-        const payload: Partial<Usuario> = { nombre: form.nombre, role: form.role };
+        const payload: Partial<Usuario> = { nombre: form.nombre, role: form.role, unidadNegocioId: form.unidadNegocioId ? Number(form.unidadNegocioId) : null };
         if (form.password) payload.password = form.password;
         await apiUpdateUsuario(editing.username, payload);
       } else {
-        await apiCreateUsuario(form);
+        await apiCreateUsuario({ ...form, unidadNegocioId: form.unidadNegocioId ? Number(form.unidadNegocioId) : null });
       }
       setShowModal(false);
       await loadData();
@@ -214,6 +217,7 @@ export default function AdminUsers() {
                     <th className="text-left py-3 px-4 text-text-muted font-medium">Usuario</th>
                     <th className="text-left py-3 px-4 text-text-muted font-medium">Nombre</th>
                     <th className="text-left py-3 px-4 text-text-muted font-medium">Rol</th>
+                    <th className="text-left py-3 px-4 text-text-muted font-medium">Unidad de Negocio</th>
                     <th className="py-3 px-4" />
                   </tr>
                 </thead>
@@ -239,6 +243,9 @@ export default function AdminUsers() {
                           )}
                           {u.role.charAt(0).toUpperCase() + u.role.slice(1)}
                         </span>
+                      </td>
+                      <td className="py-3 px-4 text-text text-sm">
+                        {u.unidadNegocioNombre || <span className="text-text-muted">—</span>}
                       </td>
                       <td className="py-3 px-4">
                         <div className="flex items-center justify-end gap-1">
@@ -335,6 +342,20 @@ export default function AdminUsers() {
                 >
                   {roles.map(r => (
                     <option key={r.id} value={r.nombre}>{r.nombre.charAt(0).toUpperCase() + r.nombre.slice(1)}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-text-muted mb-1">Unidad de Negocio</label>
+                <select
+                  value={form.unidadNegocioId}
+                  onChange={e => setForm(f => ({ ...f, unidadNegocioId: e.target.value }))}
+                  className="w-full h-11 px-3 bg-bg border border-border rounded-xl text-text focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-colors"
+                >
+                  <option value="">Sin unidad</option>
+                  {unidadesNegocio.filter(u => u.activo !== 0).map(u => (
+                    <option key={u.id} value={u.id}>{u.nombre}</option>
                   ))}
                 </select>
               </div>

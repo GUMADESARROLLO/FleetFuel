@@ -1,12 +1,13 @@
 import { useEffect, useState, useRef } from 'react';
 import { getSession, requireAuth, isAdmin, logout } from '../lib/auth';
 import {
+  apiGetUnidadesNegocio, apiCreateUnidadNegocio, apiUpdateUnidadNegocio, apiDeleteUnidadNegocio,
   apiGetVehiculos, apiCreateVehiculo, apiUpdateVehiculo, apiDeleteVehiculo,
   apiGetTiposCombustible, apiCreateTipoCombustible, apiUpdateTipoCombustible, apiDeleteTipoCombustible,
   apiGetProveedores, apiCreateProveedor, apiUpdateProveedor, apiDeleteProveedor,
   apiGetSubProyectos, apiCreateSubProyecto, apiUpdateSubProyecto, apiDeleteSubProyecto,
 } from '../lib/api';
-import type { Vehiculo, TipoCombustible, Proveedor, SubProyecto, Session } from '../lib/types';
+import type { Vehiculo, TipoCombustible, Proveedor, SubProyecto, UnidadNegocio, Session } from '../lib/types';
 
 interface CatalogTab {
   id: string;
@@ -51,6 +52,15 @@ const TABS: CatalogTab[] = [
       </svg>
     ),
   },
+  {
+    id: 'unidades-negocio',
+    label: 'Unidades de Negocio',
+    icon: (
+      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+      </svg>
+    ),
+  },
 ];
 
 type CatalogItem = { id: string | number; nombre: string } & Record<string, any>;
@@ -64,6 +74,7 @@ export default function AdminCatalogos() {
   const [tipos, setTipos] = useState<TipoCombustible[]>([]);
   const [proveedores, setProveedores] = useState<Proveedor[]>([]);
   const [subProyectos, setSubProyectos] = useState<SubProyecto[]>([]);
+  const [unidadesNegocio, setUnidadesNegocio] = useState<UnidadNegocio[]>([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [editing, setEditing] = useState<{ id: string | number; nombre: string; placa?: string } | null>(null);
@@ -99,16 +110,18 @@ export default function AdminCatalogos() {
 
   async function loadAll() {
     try {
-      const [v, t, p, s] = await Promise.all([
+      const [v, t, p, s, un] = await Promise.all([
         apiGetVehiculos(),
         apiGetTiposCombustible(),
         apiGetProveedores(),
         apiGetSubProyectos(),
+        apiGetUnidadesNegocio(),
       ]);
       setVehiculos(v);
       setTipos(t);
       setProveedores(p);
       setSubProyectos(s);
+      setUnidadesNegocio(un);
     } catch (err: any) {
       console.error('Error loading catalogs:', err);
     }
@@ -121,6 +134,7 @@ export default function AdminCatalogos() {
       case 'tipos-combustible': return tipos;
       case 'proveedores': return proveedores;
       case 'sub-proyectos': return subProyectos;
+      case 'unidades-negocio': return unidadesNegocio;
       default: return [];
     }
   }
@@ -159,6 +173,9 @@ export default function AdminCatalogos() {
           case 'sub-proyectos':
             await apiUpdateSubProyecto(Number(editing.id), form.nombre);
             break;
+          case 'unidades-negocio':
+            await apiUpdateUnidadNegocio(Number(editing.id), form.nombre);
+            break;
         }
       } else {
         switch (activeTab) {
@@ -173,6 +190,9 @@ export default function AdminCatalogos() {
             break;
           case 'sub-proyectos':
             await apiCreateSubProyecto(form.nombre);
+            break;
+          case 'unidades-negocio':
+            await apiCreateUnidadNegocio(form.nombre);
             break;
         }
       }
@@ -200,6 +220,9 @@ export default function AdminCatalogos() {
           break;
         case 'sub-proyectos':
           await apiDeleteSubProyecto(Number(item.id));
+          break;
+        case 'unidades-negocio':
+          await apiDeleteUnidadNegocio(Number(item.id));
           break;
       }
       await loadAll();

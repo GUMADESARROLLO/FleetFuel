@@ -13,7 +13,7 @@ export async function POST({ request }: { request: Request }) {
     }
 
     const rows = await query<any[]>(
-      'SELECT u.id, u.username, u.nombre, r.nombre AS role, u.password FROM usuarios u JOIN roles r ON u.role_id = r.id WHERE u.username = ?',
+      'SELECT u.id, u.username, u.nombre, r.nombre AS role, u.unidad_negocio_id, u.password FROM usuarios u JOIN roles r ON u.role_id = r.id WHERE u.username = ?',
       [username]
     );
 
@@ -39,6 +39,7 @@ export async function POST({ request }: { request: Request }) {
       username: user.username,
       nombre: user.nombre,
       role: user.role,
+      unidadNegocioId: user.unidad_negocio_id || null,
       loggedInAt: new Date().toISOString(),
     }), {
       status: 200,

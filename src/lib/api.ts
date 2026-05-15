@@ -1,4 +1,4 @@
-import type { RegistroCombustible, Usuario, Vehiculo, TipoCombustible, Proveedor, SubProyecto } from './types';
+import type { RegistroCombustible, Usuario, Vehiculo, TipoCombustible, Proveedor, SubProyecto, UnidadNegocio } from './types';
 
 export interface PaginatedResponse {
   data: RegistroCombustible[];
@@ -324,4 +324,49 @@ export async function apiUploadImage(
   }
   const json = await res.json();
   return json.url;
+}
+
+// --- Catálogos: Unidades de Negocio ---
+
+export async function apiGetUnidadesNegocio(): Promise<UnidadNegocio[]> {
+  const res = await fetch(`${BASE}/unidades-negocio`);
+  if (!res.ok) throw new Error('Error fetching unidades negocio');
+  const json = await res.json();
+  return json.data || [];
+}
+
+export async function apiCreateUnidadNegocio(nombre: string): Promise<void> {
+  const res = await fetch(`${BASE}/unidades-negocio`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ nombre }),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.error || 'Error creating unidad negocio');
+  }
+}
+
+export async function apiUpdateUnidadNegocio(id: number, nombre: string): Promise<void> {
+  const res = await fetch(`${BASE}/unidades-negocio`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ id, nombre }),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.error || 'Error updating unidad negocio');
+  }
+}
+
+export async function apiDeleteUnidadNegocio(id: number): Promise<void> {
+  const res = await fetch(`${BASE}/unidades-negocio`, {
+    method: 'DELETE',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ id }),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.error || 'Error deleting unidad negocio');
+  }
 }

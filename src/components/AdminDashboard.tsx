@@ -267,39 +267,15 @@ export default function AdminDashboard() {
 
         <div className="bg-surface rounded-xl border border-border p-4 mb-6">
           <div className="grid grid-cols-12 gap-3 items-end">
-            <div className="col-span-12 sm:col-span-6">
+            <div className="col-span-12 sm:col-span-5">
               <label className="block text-xs font-medium text-text-muted mb-1">Rango de Fechas</label>
-              <div className="flex gap-3">
-                <input
-                  ref={inputRef}
-                  name="dt_range"
-                  type="text"
-                  className="flex-1 h-10 px-3 bg-bg border border-border rounded-lg text-text text-sm focus:outline-none focus:border-accent transition-colors cursor-pointer"
-                  readOnly
-                />
-                <button
-                  onClick={() => {
-                    setAppliedDateDesde(dateDesde);
-                    setAppliedDateHasta(dateHasta);
-                    setAppliedFiltroConductor(filtroConductor);
-                    setAppliedFiltroUnidadNegocio(filtroUnidadNegocio);
-                    if (!session) return;
-                    setLoading(true);
-                    Promise.all([apiGetRegistros(), apiGetUsuarios(), apiGetUnidadesNegocio()]).then(([all, users, un]) => {
-                      setRegistros(all);
-                      setUsuarios(users);
-                      setUnidadesNegocio(un);
-                      setLoading(false);
-                    });
-                  }}
-                  className="h-10 px-4 text-sm text-text-muted hover:text-text border border-border rounded-lg hover:bg-surface transition-colors touch-target whitespace-nowrap flex items-center gap-2"
-                >
-                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                  </svg>
-                  Actualizar
-                </button>
-              </div>
+              <input
+                ref={inputRef}
+                name="dt_range"
+                type="text"
+                className="w-full h-10 px-3 bg-bg border border-border rounded-lg text-text text-sm focus:outline-none focus:border-accent transition-colors cursor-pointer"
+                readOnly
+              />
             </div>
             <div className="col-span-6 sm:col-span-3">
               <label className="block text-xs font-medium text-text-muted mb-1">Conductor</label>
@@ -326,6 +302,30 @@ export default function AdminDashboard() {
                   <option key={u.id} value={u.id}>{u.nombre}</option>
                 ))}
               </select>
+            </div>
+            <div className="col-span-12 sm:col-span-1 flex items-end justify-end">
+              <button
+                onClick={() => {
+                  setAppliedDateDesde(dateDesde);
+                  setAppliedDateHasta(dateHasta);
+                  setAppliedFiltroConductor(filtroConductor);
+                  setAppliedFiltroUnidadNegocio(filtroUnidadNegocio);
+                  if (!session) return;
+                  setLoading(true);
+                  Promise.all([apiGetRegistros(), apiGetUsuarios(), apiGetUnidadesNegocio()]).then(([all, users, un]) => {
+                    setRegistros(all);
+                    setUsuarios(users);
+                    setUnidadesNegocio(un);
+                    setLoading(false);
+                  });
+                }}
+                className="h-10 px-3 text-sm text-text-muted hover:text-text border border-border rounded-lg hover:bg-surface transition-colors touch-target whitespace-nowrap flex items-center gap-1"
+              >
+                <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+                <span className="hidden sm:inline">Actualizar</span>
+              </button>
             </div>
           </div>
         </div>

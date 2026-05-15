@@ -1,7 +1,7 @@
 import { useEffect, useState, useMemo } from 'react';
-import DatePicker from 'react-datepicker';
-import { es } from 'date-fns/locale';
 import { format } from 'date-fns';
+import { es } from 'date-fns/locale';
+import DateRangePicker from './DateRangePicker';
 import { getSession, requireAuth } from '../lib/auth';
 import {
   getRegistros,
@@ -63,39 +63,12 @@ export default function ReportesList() {
       </div>
 
       <div className="bg-surface rounded-xl border border-border p-3 mb-4">
-        <div className="flex gap-2 items-end">
-          <div className="flex-1">
-            <label className="block text-[10px] font-medium text-text-muted mb-1 uppercase">Desde</label>
-            <DatePicker
-              selected={dateDesde}
-              onChange={(d) => setDateDesde(d)}
-              selectsStart
-              startDate={dateDesde || undefined}
-              endDate={dateHasta || undefined}
-              locale={es}
-              dateFormat="dd/MM/yyyy"
-              placeholderText="Fecha inicial"
-              className="w-full h-9 px-2 bg-bg border border-border rounded-lg text-text text-xs focus:outline-none focus:border-accent transition-colors cursor-pointer"
-              wrapperClassName="w-full"
-            />
-          </div>
-          <div className="flex-1">
-            <label className="block text-[10px] font-medium text-text-muted mb-1 uppercase">Hasta</label>
-            <DatePicker
-              selected={dateHasta}
-              onChange={(d) => setDateHasta(d)}
-              selectsEnd
-              startDate={dateDesde || undefined}
-              endDate={dateHasta || undefined}
-              minDate={dateDesde || undefined}
-              locale={es}
-              dateFormat="dd/MM/yyyy"
-              placeholderText="Fecha final"
-              className="w-full h-9 px-2 bg-bg border border-border rounded-lg text-text text-xs focus:outline-none focus:border-accent transition-colors cursor-pointer"
-              wrapperClassName="w-full"
-            />
-          </div>
-        </div>
+        <DateRangePicker
+          dateDesde={dateDesde}
+          dateHasta={dateHasta}
+          onDateDesdeChange={setDateDesde}
+          onDateHastaChange={setDateHasta}
+        />
       </div>
 
       <div className="grid grid-cols-2 gap-3 mb-4">

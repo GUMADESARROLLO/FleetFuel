@@ -1,0 +1,115 @@
+.daterangepicker {
+  background-color: #1A1D24;
+  border-color: #333333;
+  font-family: var(--font-body);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+  border-radius: 12px;
+}
+
+.daterangepicker:after {
+  border-bottom-color: #1A1D24;
+}
+
+.daterangepicker.drop-up:after {
+  border-top-color: #1A1D24;
+}
+
+.daterangepicker .calendar-table {
+  background-color: #1A1D24;
+  border-color: #333333;
+  border-radius: 8px;
+}
+
+.daterangepicker .calendar-table th,
+.daterangepicker .calendar-table td {
+  color: #E8E8E8;
+  border-radius: 8px;
+  min-width: 36px;
+  width: 36px;
+  height: 28px;
+  line-height: 28px;
+  font-size: 13px;
+  border-color: transparent;
+}
+
+.daterangepicker .calendar-table th.month {
+  font-size: 14px;
+  font-weight: 600;
+  color: #E8E8E8;
+}
+
+.daterangepicker .calendar-table th.available:hover {
+  background-color: #2A2D35;
+}
+
+.daterangepicker .calendar-table .next span,
+.daterangepicker .calendar-table .prev span {
+  border-color: #E87200;
+}
+
+.daterangepicker td.available:hover {
+  background-color: #2A2D35;
+}
+
+.daterangepicker td.off,
+.daterangepicker td.off.in-range,
+.daterangepicker td.off.start-date,
+.daterangepicker td.off.end-date {
+  background-color: transparent;
+  color: #555555;
+}
+
+.daterangepicker td.in-range {
+  background-color: rgba(232, 114, 0, 0.15);
+  color: #E8E8E8;
+  border-radius: 0;
+}
+
+.daterangepicker td.start-date {
+  border-radius: 8px 0 0 8px;
+}
+
+.daterangepicker td.end-date {
+  border-radius: 0 8px 8px 0;
+}
+
+.daterangepicker td.start-date.end-date {
+  border-radius: 8px;
+}
+
+.daterangepicker td.active,
+.daterangepicker td.active:hover {
+  background-color: #E87200;
+  color: #FFFFFF;
+  font-weight: 600;
+}
+
+.daterangepicker td.disabled,
+.daterangepicker option.disabled {
+  color: #555555;
+}
+
+.daterangepicker .ranges li {
+  font-size: 13px;
+  padding: 8px 12px;
+  color: #E8E8E8;
+  border-radius: 8px;
+}
+
+.daterangepicker .ranges li:hover {
+  background-color: #2A2D35;
+}
+
+.daterangepicker .ranges li.active {
+  background-color: #E87200;
+  color: #FFFFFF;
+}
+
+.daterangepicker select.monthselect,
+.daterangepicker select.yearselect {
+  background-color: #2A2D35;
+  color: #E8E8E8;
+  border-color: #444444;
+  border-radius: 4px;
+  padding: 2px 4px;
+}

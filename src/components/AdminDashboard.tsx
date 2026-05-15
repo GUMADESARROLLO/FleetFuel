@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo, useRef } from 'react';
-import DatePicker from 'react-datepicker';
+import $ from 'jquery';
 import { es } from 'date-fns/locale';
 import { format } from 'date-fns';
 import { getSession, requireAuth, isAdmin, logout } from '../lib/auth';
@@ -21,6 +21,7 @@ export default function AdminDashboard() {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [usuarios, setUsuarios] = useState<Usuario[]>([]);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     requireAuth();
@@ -55,6 +56,70 @@ export default function AdminDashboard() {
     document.addEventListener('mousedown', handleClick);
     return () => document.removeEventListener('mousedown', handleClick);
   }, []);
+
+  useEffect(() => {
+    if (!inputRef.current || !session) return;
+
+    let picker: any;
+
+    (async () => {
+      const m = await import('moment');
+      (window as any).moment = m.default || m;
+
+      (window as any).jQuery = $;
+
+      await import('daterangepicker');
+
+      if (!inputRef.current) return;
+
+      const $input = $(inputRef.current);
+      const now = new Date();
+
+      $input.daterangepicker({
+        autoApply: true,
+        ranges: {
+          'Hoy': [new Date(), new Date()],
+          'Últm. 7 Días': [new Date(now.getTime() - 6 * 86400000), new Date()],
+          'Últm. 30 Días': [new Date(now.getTime() - 29 * 86400000), new Date()],
+          'Este Mes': [new Date(now.getFullYear(), now.getMonth(), 1), new Date()],
+          'Mes Anterior': [new Date(now.getFullYear(), now.getMonth() - 1, 1), new Date(now.getFullYear(), now.getMonth(), 0)],
+          "3 Meses": [new Date(now.getFullYear(), now.getMonth() - 3, 1), new Date()],
+          "6 Meses": [new Date(now.getFullYear(), now.getMonth() - 6, 1), new Date()],
+          '1 Año': [new Date(now.getFullYear() - 1, now.getMonth(), 1), new Date()],
+        },
+        showCustomRangeLabel: false,
+        alwaysShowCalendars: true,
+        startDate: new Date(now.getFullYear(), now.getMonth(), 1),
+        endDate: new Date(),
+        opens: 'left',
+        locale: {
+          format: "D MMM. YYYY",
+          separator: " - ",
+          applyLabel: "Aplicar",
+          cancelLabel: "Cancelar",
+          fromLabel: "Desde",
+          toLabel: "Hasta",
+          customRangeLabel: "Personalizado",
+          weekLabel: "S",
+          daysOfWeek: ["Dom.", "Lun.", "Mar.", "Mie.", "Jue.", "Vie", "Sab."],
+          monthNames: [
+            "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
+            "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
+          ],
+          firstDay: 1
+        }
+      }, function(start: any, end: any) {
+        setDateDesde(start.toDate());
+        setDateHasta(end.toDate());
+      });
+
+      picker = $input.data('daterangepicker');
+    })();
+
+    return () => {
+      if (picker) picker.remove();
+    };
+  }, [session]);
 
   const filtered = useMemo(() => {
     let data = [...registros];
@@ -173,34 +238,13 @@ export default function AdminDashboard() {
         <div className="bg-surface rounded-xl border border-border p-4 mb-6">
           <div className="flex flex-col sm:flex-row gap-3 items-end">
             <div className="flex-1 w-full sm:w-auto">
-              <label className="block text-xs font-medium text-text-muted mb-1">Desde</label>
-              <DatePicker
-                selected={dateDesde}
-                onChange={(d) => setDateDesde(d)}
-                selectsStart
-                startDate={dateDesde || undefined}
-                endDate={dateHasta || undefined}
-                locale={es}
-                dateFormat="dd/MM/yyyy"
-                placeholderText="Seleccionar fecha"
+              <label className="block text-xs font-medium text-text-muted mb-1">Rango de Fechas</label>
+              <input
+                ref={inputRef}
+                name="dt_range"
+                type="text"
                 className="w-full h-10 px-3 bg-bg border border-border rounded-lg text-text text-sm focus:outline-none focus:border-accent transition-colors cursor-pointer"
-                wrapperClassName="w-full"
-              />
-            </div>
-            <div className="flex-1 w-full sm:w-auto">
-              <label className="block text-xs font-medium text-text-muted mb-1">Hasta</label>
-              <DatePicker
-                selected={dateHasta}
-                onChange={(d) => setDateHasta(d)}
-                selectsEnd
-                startDate={dateDesde || undefined}
-                endDate={dateHasta || undefined}
-                minDate={dateDesde || undefined}
-                locale={es}
-                dateFormat="dd/MM/yyyy"
-                placeholderText="Seleccionar fecha"
-                className="w-full h-10 px-3 bg-bg border border-border rounded-lg text-text text-sm focus:outline-none focus:border-accent transition-colors cursor-pointer"
-                wrapperClassName="w-full"
+                readOnly
               />
             </div>
             <div className="flex-1 w-full sm:w-auto">
@@ -216,14 +260,35 @@ export default function AdminDashboard() {
                 ))}
               </select>
             </div>
-            {(dateDesde || dateHasta || filtroConductor) && (
-              <button
-                onClick={() => { setDateDesde(null); setDateHasta(null); setFiltroConductor(''); }}
-                className="h-10 px-4 text-sm text-text-muted hover:text-text border border-border rounded-lg hover:bg-surface transition-colors touch-target whitespace-nowrap"
-              >
-                Limpiar
-              </button>
-            )}
+            <button
+              onClick={() => {
+                const inicioMes = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+                const hoy = new Date();
+                setDateDesde(inicioMes);
+                setDateHasta(hoy);
+                setFiltroConductor('');
+                if (inputRef.current) {
+                  const picker = $(inputRef.current).data('daterangepicker');
+                  if (picker) {
+                    picker.setStartDate(inicioMes);
+                    picker.setEndDate(hoy);
+                  }
+                }
+                if (!session) return;
+                setLoading(true);
+                Promise.all([apiGetRegistros(), apiGetUsuarios()]).then(([all, users]) => {
+                  setRegistros(all);
+                  setUsuarios(users);
+                  setLoading(false);
+                });
+              }}
+              className="h-10 px-4 text-sm text-text-muted hover:text-text border border-border rounded-lg hover:bg-surface transition-colors touch-target whitespace-nowrap flex items-center gap-2"
+            >
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+              Actualizar
+            </button>
           </div>
         </div>
 

@@ -12,13 +12,19 @@ export default function AdminDashboard() {
   const [session, setSession] = useState<Session | null>(null);
   const [registros, setRegistros] = useState<RegistroCombustible[]>([]);
   const [loading, setLoading] = useState(true);
-  const [dateDesde, setDateDesde] = useState<Date | null>(() => {
+  const initDesde = useMemo(() => {
     const d = new Date();
     return new Date(d.getFullYear(), d.getMonth(), 1);
-  });
-  const [dateHasta, setDateHasta] = useState<Date | null>(new Date());
+  }, []);
+  const initHasta = useMemo(() => new Date(), []);
+  const [dateDesde, setDateDesde] = useState<Date | null>(initDesde);
+  const [dateHasta, setDateHasta] = useState<Date | null>(initHasta);
   const [filtroConductor, setFiltroConductor] = useState('');
   const [filtroUnidadNegocio, setFiltroUnidadNegocio] = useState('');
+  const [appliedDateDesde, setAppliedDateDesde] = useState<Date | null>(initDesde);
+  const [appliedDateHasta, setAppliedDateHasta] = useState<Date | null>(initHasta);
+  const [appliedFiltroConductor, setAppliedFiltroConductor] = useState('');
+  const [appliedFiltroUnidadNegocio, setAppliedFiltroUnidadNegocio] = useState('');
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [usuarios, setUsuarios] = useState<Usuario[]>([]);
   const [unidadesNegocio, setUnidadesNegocio] = useState<UnidadNegocio[]>([]);
@@ -127,21 +133,21 @@ export default function AdminDashboard() {
 
   const filtered = useMemo(() => {
     let data = [...registros];
-    if (dateDesde) {
-      data = data.filter(r => new Date(r.fechaCreacion) >= new Date(dateDesde.getFullYear(), dateDesde.getMonth(), dateDesde.getDate()));
+    if (appliedDateDesde) {
+      data = data.filter(r => new Date(r.fechaCreacion) >= new Date(appliedDateDesde.getFullYear(), appliedDateDesde.getMonth(), appliedDateDesde.getDate()));
     }
-    if (dateHasta) {
-      data = data.filter(r => new Date(r.fechaCreacion) <= new Date(dateHasta.getFullYear(), dateHasta.getMonth(), dateHasta.getDate(), 23, 59, 59));
+    if (appliedDateHasta) {
+      data = data.filter(r => new Date(r.fechaCreacion) <= new Date(appliedDateHasta.getFullYear(), appliedDateHasta.getMonth(), appliedDateHasta.getDate(), 23, 59, 59));
     }
-    if (filtroConductor) {
-      data = data.filter(r => r.userId === Number(filtroConductor));
+    if (appliedFiltroConductor) {
+      data = data.filter(r => r.userId === Number(appliedFiltroConductor));
     }
-    if (filtroUnidadNegocio) {
-      const ids = new Set(usuarios.filter(u => String(u.unidadNegocioId) === filtroUnidadNegocio).map(u => u.id));
+    if (appliedFiltroUnidadNegocio) {
+      const ids = new Set(usuarios.filter(u => String(u.unidadNegocioId) === appliedFiltroUnidadNegocio).map(u => u.id));
       data = data.filter(r => ids.has(r.userId));
     }
     return data.sort((a, b) => new Date(b.fechaCreacion).getTime() - new Date(a.fechaCreacion).getTime());
-  }, [registros, dateDesde, dateHasta, filtroConductor, filtroUnidadNegocio, usuarios]);
+  }, [registros, appliedDateDesde, appliedDateHasta, appliedFiltroConductor, appliedFiltroUnidadNegocio, usuarios]);
 
   const metrics = useMemo(() => {
     const totalRegistros = filtered.length;
@@ -252,8 +258,8 @@ export default function AdminDashboard() {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
           <h1 className="text-xl font-bold font-display text-text">Panel de Administración</h1>
           <span className="text-sm text-text-muted font-medium">
-            {dateDesde && dateHasta
-              ? `Periodo: ${format(dateDesde, "d MMM'.' yyyy", { locale: es })} al ${format(dateHasta, "d MMM'.' yyyy", { locale: es })}`
+            {appliedDateDesde && appliedDateHasta
+              ? `Periodo: ${format(appliedDateDesde, "d MMM'.' yyyy", { locale: es })} al ${format(appliedDateHasta, "d MMM'.' yyyy", { locale: es })}`
               : 'Sin filtro de fecha'}
           </span>
         </div>
@@ -298,19 +304,10 @@ export default function AdminDashboard() {
             </div>
             <button
               onClick={() => {
-                const inicioMes = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
-                const hoy = new Date();
-                setDateDesde(inicioMes);
-                setDateHasta(hoy);
-                setFiltroConductor('');
-                setFiltroUnidadNegocio('');
-                if (inputRef.current) {
-                  const picker = $(inputRef.current).data('daterangepicker');
-                  if (picker) {
-                    picker.setStartDate(inicioMes);
-                    picker.setEndDate(hoy);
-                  }
-                }
+                setAppliedDateDesde(dateDesde);
+                setAppliedDateHasta(dateHasta);
+                setAppliedFiltroConductor(filtroConductor);
+                setAppliedFiltroUnidadNegocio(filtroUnidadNegocio);
                 if (!session) return;
                 setLoading(true);
                 Promise.all([apiGetRegistros(), apiGetUsuarios(), apiGetUnidadesNegocio()]).then(([all, users, un]) => {
@@ -415,10 +412,10 @@ export default function AdminDashboard() {
             )}
 
             <DataTable
-              dateDesde={dateDesde}
-              dateHasta={dateHasta}
-              filtroConductor={filtroConductor}
-              filtroUnidadNegocio={filtroUnidadNegocio}
+              dateDesde={appliedDateDesde}
+              dateHasta={appliedDateHasta}
+              filtroConductor={appliedFiltroConductor}
+              filtroUnidadNegocio={appliedFiltroUnidadNegocio}
             />
           </>
         )}

@@ -6,17 +6,19 @@ const FIELDS = `r.id, r.user_id, r.fecha_creacion, r.foto_odometro_antes, r.foto
   tc.nombre AS tipo_combustible, p.nombre AS proveedor, sp.nombre AS sub_proyecto,
   r.kilometraje, r.fecha_factura,
   r.numero_factura, r.numero_voucher, r.gravadas, r.isr, r.excedentes, r.litros,
-  r.importe_total, r.ruta_recorrida, r.sincronizado`;
+  r.importe_total, r.ruta_recorrida, r.sincronizado, u.nombre AS conductor_nombre`;
 
 const JOINS = `FROM registros_combustible r
   LEFT JOIN tipos_combustible tc ON r.tipo_combustible_id = tc.id
   LEFT JOIN proveedores p ON r.proveedor_id = p.id
-  LEFT JOIN sub_proyectos sp ON r.sub_proyecto_id = sp.id`;
+  LEFT JOIN sub_proyectos sp ON r.sub_proyecto_id = sp.id
+  LEFT JOIN usuarios u ON r.user_id = u.id`;
 
 function mapRow(r: any): RegistroCombustible {
   return {
     id: r.id,
     userId: r.user_id,
+    conductorNombre: r.conductor_nombre,
     fechaCreacion: r.fecha_creacion instanceof Date ? r.fecha_creacion.toISOString() : r.fecha_creacion,
     fotoOdometroAntes: r.foto_odometro_antes,
     fotoOdometroDespues: r.foto_odometro_despues,
@@ -47,29 +49,52 @@ export async function GET({ url }: { url: URL }) {
     const userId = url.searchParams.get('userId');
     const desde = url.searchParams.get('desde');
     const hasta = url.searchParams.get('hasta');
+    const page = Math.max(1, Number(url.searchParams.get('page')) || 1);
+    const pageSize = Math.min(100, Math.max(10, Number(url.searchParams.get('pageSize')) || 25));
+    const search = url.searchParams.get('search') || '';
+    const sortBy = url.searchParams.get('sortBy') || 'fecha_creacion';
+    const sortDir = url.searchParams.get('sortDir') === 'asc' ? 'ASC' : 'DESC';
 
-    let sql = `SELECT ${FIELDS} ${JOINS} WHERE 1=1`;
+    const allowedSortColumns: Record<string, string> = {
+      fecha_creacion: 'r.fecha_creacion',
+      vehiculo_nombre: 'r.vehiculo_nombre',
+      litros: 'r.litros',
+      importe_total: 'r.importe_total',
+      user_id: 'r.user_id',
+    };
+    const sortColumn = allowedSortColumns[sortBy] || 'r.fecha_creacion';
+
+    let where = 'WHERE 1=1';
     const params: any[] = [];
 
     if (userId) {
-      sql += ' AND r.user_id = ?';
+      where += ' AND r.user_id = ?';
       params.push(userId);
     }
     if (desde) {
-      sql += ' AND r.fecha_creacion >= ?';
+      where += ' AND r.fecha_creacion >= ?';
       params.push(new Date(desde));
     }
     if (hasta) {
-      sql += ' AND r.fecha_creacion <= ?';
+      where += ' AND r.fecha_creacion <= ?';
       params.push(new Date(hasta + 'T23:59:59'));
     }
+    if (search) {
+      where += ' AND (u.nombre LIKE ? OR r.vehiculo_nombre LIKE ? OR r.vehiculo_placa LIKE ? OR r.numero_factura LIKE ?)';
+      const like = `%${search}%`;
+      params.push(like, like, like, like);
+    }
 
-    sql += ' ORDER BY r.fecha_creacion DESC';
+    const countSql = `SELECT COUNT(*) AS total ${JOINS} ${where}`;
+    const countResult = await query<any[]>(countSql, params);
+    const total = countResult[0]?.total ?? 0;
 
-    const rows = await query<any[]>(sql, params);
+    const selectSql = `SELECT ${FIELDS} ${JOINS} ${where} ORDER BY ${sortColumn} ${sortDir} LIMIT ? OFFSET ?`;
+    const offset = (page - 1) * pageSize;
+    const rows = await query<any[]>(selectSql, [...params, pageSize, offset]);
     const data = rows.map(mapRow);
 
-    return new Response(JSON.stringify({ data }), {
+    return new Response(JSON.stringify({ data, total, page, pageSize }), {
       status: 200,
       headers: { 'Content-Type': 'application/json' },
     });

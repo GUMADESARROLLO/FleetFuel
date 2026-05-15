@@ -44,6 +44,7 @@ export interface SubProyecto {
 export interface RegistroCombustible {
   id: string;
   userId: number;
+  conductorNombre?: string;
   fechaCreacion: string;
   fotoOdometroAntes: string;
   fotoOdometroDespues: string;

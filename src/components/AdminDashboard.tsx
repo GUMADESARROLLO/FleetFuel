@@ -3,9 +3,10 @@ import DatePicker from 'react-datepicker';
 import { es } from 'date-fns/locale';
 import { format } from 'date-fns';
 import { getSession, requireAuth, isAdmin, logout } from '../lib/auth';
-import { formatCurrency, formatDate } from '../lib/storage';
+import { formatCurrency } from '../lib/storage';
 import { apiGetRegistros, apiGetUsuarios } from '../lib/api';
 import type { RegistroCombustible, Session, Usuario } from '../lib/types';
+import DataTable from './DataTable';
 
 export default function AdminDashboard() {
   const [session, setSession] = useState<Session | null>(null);
@@ -282,65 +283,11 @@ export default function AdminDashboard() {
               </div>
             )}
 
-            <div className="bg-surface rounded-xl border border-border overflow-hidden">
-              <div className="p-4 border-b border-border">
-                <h2 className="text-sm font-bold text-text uppercase tracking-wider">
-                  Todos los Registros {filtered.length > 0 && <span className="text-text-muted font-normal">({filtered.length})</span>}
-                </h2>
-              </div>
-              {filtered.length === 0 ? (
-                <div className="p-8 text-center">
-                  <svg className="w-12 h-12 text-surface-2 mx-auto mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                  </svg>
-                  <p className="text-sm text-text-muted">No hay registros en este período</p>
-                </div>
-              ) : (
-                <div className="overflow-x-auto">
-                  <table className="w-full text-sm">
-                    <thead>
-                      <tr className="border-b border-border bg-bg/50">
-                        <th className="text-left py-3 px-4 text-text-muted font-medium whitespace-nowrap">Fecha</th>
-                        <th className="text-left py-3 px-4 text-text-muted font-medium whitespace-nowrap">Conductor</th>
-                        <th className="text-left py-3 px-4 text-text-muted font-medium whitespace-nowrap">Vehículo</th>
-                        <th className="text-right py-3 px-4 text-text-muted font-medium whitespace-nowrap">Litros</th>
-                        <th className="text-right py-3 px-4 text-text-muted font-medium whitespace-nowrap">Importe</th>
-                        <th className="text-center py-3 px-4 text-text-muted font-medium whitespace-nowrap">Sync</th>
-                        <th className="py-3 px-4" />
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {filtered.map(r => {
-                        const conductor = usuarios.find(u => u.id === r.userId);
-                        return (
-                          <tr key={r.id} className="border-b border-border/50 hover:bg-bg/30 transition-colors">
-                            <td className="py-3 px-4 text-text whitespace-nowrap">{formatDate(r.fechaCreacion)}</td>
-                            <td className="py-3 px-4 text-text">{conductor?.nombre || String(r.userId)}</td>
-                            <td className="py-3 px-4 text-text">{r.vehiculoNombre}</td>
-                            <td className="py-3 px-4 text-right text-text whitespace-nowrap">{r.litros?.toFixed(1) || '0'} L</td>
-                            <td className="py-3 px-4 text-right text-accent font-bold whitespace-nowrap">{formatCurrency(r.importeTotal || 0)}</td>
-                            <td className="py-3 px-4 text-center">
-                              <span className={`inline-block w-2 h-2 rounded-full ${r.sincronizado ? 'bg-success' : 'bg-accent'}`} />
-                            </td>
-                            <td className="py-3 px-4">
-                              <a
-                                href={`/reportes/${r.id}`}
-                                className="text-accent hover:underline text-xs font-medium touch-target inline-flex items-center gap-1"
-                              >
-                                Ver
-                                <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-                                </svg>
-                              </a>
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-            </div>
+            <DataTable
+              dateDesde={dateDesde}
+              dateHasta={dateHasta}
+              filtroConductor={filtroConductor}
+            />
           </>
         )}
       </main>

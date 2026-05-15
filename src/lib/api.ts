@@ -1,5 +1,12 @@
 import type { RegistroCombustible, Usuario, Vehiculo, TipoCombustible, Proveedor, SubProyecto } from './types';
 
+export interface PaginatedResponse {
+  data: RegistroCombustible[];
+  total: number;
+  page: number;
+  pageSize: number;
+}
+
 const BASE = '/api';
 
 export async function apiGetRegistros(params?: {
@@ -16,6 +23,31 @@ export async function apiGetRegistros(params?: {
   if (!res.ok) throw new Error('Error fetching registros');
   const json = await res.json();
   return json.data || [];
+}
+
+export async function apiGetRegistrosPaginated(params?: {
+  userId?: number;
+  desde?: string;
+  hasta?: string;
+  page?: number;
+  pageSize?: number;
+  search?: string;
+  sortBy?: string;
+  sortDir?: 'asc' | 'desc';
+}): Promise<PaginatedResponse> {
+  const search = new URLSearchParams();
+  if (params?.userId) search.set('userId', String(params.userId));
+  if (params?.desde) search.set('desde', params.desde);
+  if (params?.hasta) search.set('hasta', params.hasta);
+  if (params?.page) search.set('page', String(params.page));
+  if (params?.pageSize) search.set('pageSize', String(params.pageSize));
+  if (params?.search) search.set('search', params.search);
+  if (params?.sortBy) search.set('sortBy', params.sortBy);
+  if (params?.sortDir) search.set('sortDir', params.sortDir);
+  const qs = search.toString();
+  const res = await fetch(`${BASE}/registros${qs ? '?' + qs : ''}`);
+  if (!res.ok) throw new Error('Error fetching registros');
+  return res.json();
 }
 
 export async function apiGetRegistroById(id: string): Promise<RegistroCombustible | null> {

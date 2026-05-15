@@ -27,6 +27,7 @@ export async function apiGetRegistros(params?: {
 
 export async function apiGetRegistrosPaginated(params?: {
   userId?: number;
+  unidadNegocioId?: number;
   desde?: string;
   hasta?: string;
   page?: number;
@@ -37,6 +38,7 @@ export async function apiGetRegistrosPaginated(params?: {
 }): Promise<PaginatedResponse> {
   const search = new URLSearchParams();
   if (params?.userId) search.set('userId', String(params.userId));
+  if (params?.unidadNegocioId) search.set('unidadNegocioId', String(params.unidadNegocioId));
   if (params?.desde) search.set('desde', params.desde);
   if (params?.hasta) search.set('hasta', params.hasta);
   if (params?.page) search.set('page', String(params.page));

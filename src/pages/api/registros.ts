@@ -47,6 +47,7 @@ function mapRow(r: any): RegistroCombustible {
 export async function GET({ url }: { url: URL }) {
   try {
     const userId = url.searchParams.get('userId');
+    const unidadNegocioId = url.searchParams.get('unidadNegocioId');
     const desde = url.searchParams.get('desde');
     const hasta = url.searchParams.get('hasta');
     const page = Math.max(1, Number(url.searchParams.get('page')) || 1);
@@ -70,6 +71,10 @@ export async function GET({ url }: { url: URL }) {
     if (userId) {
       where += ' AND r.user_id = ?';
       params.push(userId);
+    }
+    if (unidadNegocioId) {
+      where += ' AND u.unidad_negocio_id = ?';
+      params.push(unidadNegocioId);
     }
     if (desde) {
       where += ' AND r.fecha_creacion >= ?';

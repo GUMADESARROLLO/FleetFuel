@@ -4,8 +4,8 @@ import { es } from 'date-fns/locale';
 import { format } from 'date-fns';
 import { getSession, requireAuth, isAdmin, logout } from '../lib/auth';
 import { formatCurrency } from '../lib/storage';
-import { apiGetRegistros, apiGetUsuarios } from '../lib/api';
-import type { RegistroCombustible, Session, Usuario } from '../lib/types';
+import { apiGetRegistros, apiGetUsuarios, apiGetUnidadesNegocio } from '../lib/api';
+import type { RegistroCombustible, Session, Usuario, UnidadNegocio } from '../lib/types';
 import DataTable from './DataTable';
 
 export default function AdminDashboard() {
@@ -18,8 +18,10 @@ export default function AdminDashboard() {
   });
   const [dateHasta, setDateHasta] = useState<Date | null>(new Date());
   const [filtroConductor, setFiltroConductor] = useState('');
+  const [filtroUnidadNegocio, setFiltroUnidadNegocio] = useState('');
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [usuarios, setUsuarios] = useState<Usuario[]>([]);
+  const [unidadesNegocio, setUnidadesNegocio] = useState<UnidadNegocio[]>([]);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -37,12 +39,14 @@ export default function AdminDashboard() {
     if (!session) return;
     (async () => {
       setLoading(true);
-      const [all, users] = await Promise.all([
+      const [all, users, un] = await Promise.all([
         apiGetRegistros(),
         apiGetUsuarios(),
+        apiGetUnidadesNegocio(),
       ]);
       setRegistros(all);
       setUsuarios(users);
+      setUnidadesNegocio(un);
       setLoading(false);
     })();
   }, [session]);
@@ -132,8 +136,12 @@ export default function AdminDashboard() {
     if (filtroConductor) {
       data = data.filter(r => r.userId === Number(filtroConductor));
     }
+    if (filtroUnidadNegocio) {
+      const ids = new Set(usuarios.filter(u => String(u.unidadNegocioId) === filtroUnidadNegocio).map(u => u.id));
+      data = data.filter(r => ids.has(r.userId));
+    }
     return data.sort((a, b) => new Date(b.fechaCreacion).getTime() - new Date(a.fechaCreacion).getTime());
-  }, [registros, dateDesde, dateHasta, filtroConductor]);
+  }, [registros, dateDesde, dateHasta, filtroConductor, filtroUnidadNegocio, usuarios]);
 
   const metrics = useMemo(() => {
     const totalRegistros = filtered.length;
@@ -275,6 +283,19 @@ export default function AdminDashboard() {
                 ))}
               </select>
             </div>
+            <div className="flex-1 w-full sm:w-auto">
+              <label className="block text-xs font-medium text-text-muted mb-1">Unidad de Negocio</label>
+              <select
+                value={filtroUnidadNegocio}
+                onChange={e => setFiltroUnidadNegocio(e.target.value)}
+                className="w-full h-10 px-3 bg-bg border border-border rounded-lg text-text text-sm focus:outline-none focus:border-accent transition-colors"
+              >
+                <option value="">Todas</option>
+                {unidadesNegocio.filter(u => u.activo).map(u => (
+                  <option key={u.id} value={u.id}>{u.nombre}</option>
+                ))}
+              </select>
+            </div>
             <button
               onClick={() => {
                 const inicioMes = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
@@ -282,6 +303,7 @@ export default function AdminDashboard() {
                 setDateDesde(inicioMes);
                 setDateHasta(hoy);
                 setFiltroConductor('');
+                setFiltroUnidadNegocio('');
                 if (inputRef.current) {
                   const picker = $(inputRef.current).data('daterangepicker');
                   if (picker) {
@@ -291,9 +313,10 @@ export default function AdminDashboard() {
                 }
                 if (!session) return;
                 setLoading(true);
-                Promise.all([apiGetRegistros(), apiGetUsuarios()]).then(([all, users]) => {
+                Promise.all([apiGetRegistros(), apiGetUsuarios(), apiGetUnidadesNegocio()]).then(([all, users, un]) => {
                   setRegistros(all);
                   setUsuarios(users);
+                  setUnidadesNegocio(un);
                   setLoading(false);
                 });
               }}
@@ -395,6 +418,7 @@ export default function AdminDashboard() {
               dateDesde={dateDesde}
               dateHasta={dateHasta}
               filtroConductor={filtroConductor}
+              filtroUnidadNegocio={filtroUnidadNegocio}
             />
           </>
         )}

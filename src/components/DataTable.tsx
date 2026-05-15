@@ -10,6 +10,7 @@ interface Props {
   dateDesde: Date | null;
   dateHasta: Date | null;
   filtroConductor: string;
+  filtroUnidadNegocio: string;
 }
 
 type SortDir = 'asc' | 'desc';
@@ -18,7 +19,7 @@ interface SortState {
   dir: SortDir;
 }
 
-export default function DataTable({ dateDesde, dateHasta, filtroConductor }: Props) {
+export default function DataTable({ dateDesde, dateHasta, filtroConductor, filtroUnidadNegocio }: Props) {
   const [data, setData] = useState<RegistroCombustible[]>([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
@@ -45,6 +46,7 @@ export default function DataTable({ dateDesde, dateHasta, filtroConductor }: Pro
         desde: dateDesde ? dateDesde.toISOString().split('T')[0] : undefined,
         hasta: dateHasta ? dateHasta.toISOString().split('T')[0] : undefined,
         userId: filtroConductor ? Number(filtroConductor) : undefined,
+        unidadNegocioId: filtroUnidadNegocio ? Number(filtroUnidadNegocio) : undefined,
       });
       setData(result.data);
       setTotal(result.total);
@@ -53,7 +55,7 @@ export default function DataTable({ dateDesde, dateHasta, filtroConductor }: Pro
     } finally {
       setLoading(false);
     }
-  }, [page, pageSize, search, sort, dateDesde, dateHasta, filtroConductor]);
+  }, [page, pageSize, search, sort, dateDesde, dateHasta, filtroConductor, filtroUnidadNegocio]);
 
   useEffect(() => {
     fetchData();
@@ -61,7 +63,7 @@ export default function DataTable({ dateDesde, dateHasta, filtroConductor }: Pro
 
   useEffect(() => {
     setPage(1);
-  }, [search, dateDesde, dateHasta, filtroConductor]);
+  }, [search, dateDesde, dateHasta, filtroConductor, filtroUnidadNegocio]);
 
   const handleSearch = (value: string) => {
     if (searchTimer.current) clearTimeout(searchTimer.current);
